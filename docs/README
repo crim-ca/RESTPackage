@@ -1,0 +1,9 @@
+To generate the documentation, you need to install all the requirements in
+../requirements.pip. A good idea is to do this in a virtual env, source the
+activate script such as:
+   
+   source env/bin/activate.csh
+
+Then, from this directory, issue the command:
+
+   make html

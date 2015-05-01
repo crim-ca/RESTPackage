@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>{{ html_response }}</h2>
+    {% if vesta_exception is defined %}
+        <div class=error>
+            <p>Internal error code:</p>
+            {{ vesta_exception }}
+            <p>See <a href={{ doc_url }}>{{ doc_url }}</a> for more details on the error and usage.</p>
+	    </div>
+    {% else %}
+    {% endif %}
+{% endblock %}
