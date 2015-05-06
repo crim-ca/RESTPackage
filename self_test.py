@@ -20,7 +20,8 @@ import requests
 SSM_SERVER = 'services.vesta.crim.ca'
 SSM_REST_ROOT = '/multimedia_storage/v1_5'
 
-VLB_SERVER = 'services.vesta.crim.ca'
+# VLB_SERVER = 'services.vesta.crim.ca'
+VLB_SERVER = 'localhost'
 VLB_REST_ROOT = '/vlb/v1_5/transition'
 
 test_filename = '/media/sf_develop/vesta/trunk/Service_Storage_Multimedia/' \
