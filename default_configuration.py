@@ -35,6 +35,7 @@ REQUEST_REGISTER_FN = "static/requests.shelve"
 
 GET_STORAGE_DOC_REQ_URL = ("http://localhost/multimedia_storage"
                            "/get/{storage_doc_id}")
+POST_STORAGE_DOC_REQ_URL = "http://localhost/multimedia_storage/add"
 POST_ANNOTATIONS_REQ_URL = ("http://localhost/annotation_storage/"
                             "document/{ann_doc_id}/annotations?storageType=2")
 
@@ -130,3 +131,24 @@ RUBBER_MIN_IDLE_WORKERS = 1
 RUBBER_SLACKER_TIME_THRESHOLD = 300
 
 FLOWER_API_URL = "http://localhost:5555/api"
+
+MSS = {
+    'SWIFT': {
+        'certificate_filename': 'dir/to/the/certificate.pem',
+        'token_server': 'localhost',
+        'token_server_user': 'user',
+        'os-auth-url': 'http://swift.ca:5000/v2.0',
+        'os-tenant-name': 'tenant',
+        'os-username': 'username',
+        'os-password': 'password',
+        'os-region-name': 'region'
+        },
+
+    'STORAGE_SERVICE_CONTAINER': 'ServiceStorageMultimedia',
+
+    # Swift token renewal frequency (Twice a day)
+    'TOKEN_RENEWAL_FREQ': 43200,
+
+    # Temp url validity (One day)
+    'TEMP_URL_DEFAULT_VALIDITY': 86400
+    }
