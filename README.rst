@@ -1,3 +1,7 @@
+==================================
+VestaRestPackage
+==================================
+
 This package offers helper modules for exposing services working in a
 distributed Service architecture through a REST interface. The work being
 executed by these services might be an annotation process or a form of
@@ -6,8 +10,15 @@ a distributed processing system with a REST interface.
 
 Messages are communicated through a Celery distributed processing queue system.
 
-Requirements / installation
----------------------------
+-------
+LICENSE
+-------
+
+see https://github.com/crim-ca/RESTPackage/tree/master/THIRD-PARTY-LICENSES.rst
+
+------------
+Installation
+------------
 
 The class was developed on/for Scientific Linux release 6.4 (Carbon) though it
 should work with most recent Linux distributions.
