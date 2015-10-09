@@ -38,8 +38,8 @@ from .utility_rest import request_wants_json
 from .reverse_proxied import ReverseProxied
 from .utility_rest import get_requests_db
 from .utility_rest import AnyIntConverter
-from .__meta__ import API_VERSION
 from . import self_test
+from . import __meta__
 
 # Handle Reverse Proxy setups
 APP.wsgi_app = ReverseProxied(APP.wsgi_app)
@@ -122,7 +122,8 @@ def global_info():
     """
     Return an overview of the services hosted by this REST instance
     """
-    info_ = {'version': API_VERSION, 'services': APP.config['WORKER_SERVICES']}
+    info_ = {'version': __meta__.API_VERSION,
+             'services': APP.config['WORKER_SERVICES']}
     return jsonify(info_)
 
 
@@ -158,7 +159,8 @@ def info(service_route='.'):
     worker_config = APP.config['WORKER_SERVICES'][service_name]
     service_info = []
     service_info.append(('version', '{0}_{1}'.
-                         format(API_VERSION, worker_config['version'])))
+                         format(__meta__.API_VERSION,
+                                worker_config['version'])))
     for category in service_info_categories:
         cat = worker_config[category]
         service_info.append((category, cat))

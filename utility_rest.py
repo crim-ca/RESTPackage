@@ -64,16 +64,16 @@ def request_wants_json():
 def set_html_as_default_response():
     """
     By default if the accept mimetypes contains */*, JSON format will be used.
-    By calling this function, the */* mimetype will be changed explicitely into
+    By calling this function, the */* mimetype will be changed explicitly into
     text/html so that it becomes the mimetype used by default.
     """
 
     # Best will be HTML if it's in accept mimetypes and
-    # has a quality greater or equal to json.
-    # For */* both json and HTML will have the same quality so HTML still wins
+    # has a quality greater or equal to JSON.
+    # For */* both JSON and HTML will have the same quality so HTML still wins
     best = request.accept_mimetypes.best_match(['text/html',
                                                 'application/json'])
-    # Replace any */* by HTML so that json isn't picked by default
+    # Replace any */* by HTML so that JSON isn't picked by default
     if best == 'text/html':
         request.accept_mimetypes = \
             MIMEAccept([('text/html',
@@ -127,7 +127,7 @@ def validate_state(uuid, service_name, state):
 
     - Check that the activity flag is True
         if the task has leave the PENDING status
-    - Check that the worker version in the payload fit the config one
+    - Check that the worker version in the payload fit the configuration one
 
     :param uuid: UUID of a given request
     :type uuid: Unicode
@@ -140,7 +140,7 @@ def validate_state(uuid, service_name, state):
     logger = logging.getLogger(__name__)
     select_query = ('select activity from requests where '
                     'service = ? and uuid = ?')
-    logger.debug(u"Verifying the activity flag in db "
+    logger.debug(u"Verifying the activity flag in DB "
                  u"for request «{0}» to {1}"
                  .format(uuid, service_name))
 
@@ -176,7 +176,7 @@ def validate_state(uuid, service_name, state):
 
     if state['status'] == 'PROGRESS':
         payload_ver = state['result']['worker_id_version']
-        decl_ver = APP.config['WORKER_SERVICES']['version']
+        decl_ver = APP.config['WORKER_SERVICES'][service_name]['version']
 
         if payload_ver != decl_ver:
             msg = (u'Service {serv} declares the version {decl_ver} '
@@ -281,6 +281,7 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
     logger = logging.getLogger(__name__)
     service_name = validate_service_route(service_route)
     params = extra_params
+    logger.debug("Extra params are : %s", params)
 
     if service_route == '.':
         friendly_task_name = task_name
@@ -294,7 +295,7 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
                                         '/{0}'.format(task_name),
                                         'doc_url')
 
-        # request.values combines values from args and form
+        # request.values combines values from arguments and form
         doc_url = request.values['doc_url']
 
         logger.info(u'Submitting "{task}" task with public url : {url}'
@@ -316,10 +317,11 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
     storage_args = filter(is_storage_arg, request.values.keys())
     url_args = filter(is_url_arg, request.values.keys())
 
-    if storage_args or url_args:
-        if 'misc' not in params:
-            params['misc'] = {}
+    if 'misc' not in params:
+        logger.debug("Initialising empty dict for absent misc structure")
+        params['misc'] = {}
 
+    if storage_args or url_args:
         logger.debug(u"{l} arguments referencing storage ids: {a}".
                      format(l=len(storage_args), a=storage_args))
 
@@ -359,11 +361,20 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
     log_request(service_name, 'POST {request} request on {doc_url}'
                 .format(request=task_name, doc_url=doc_url))
 
+    other_args = {}
+    for key, value in request.values.items():
+        if not is_storage_arg(key) and not is_url_arg(key):
+            other_args[key] = value
+
+    logger.debug("Other arbitrary arguments: %s", other_args)
+
     worker_config = APP.config['WORKER_SERVICES'][service_name]
     celery_task_name = worker_config['celery_task_name']
     params['url'] = doc_url
     params['name'] = celery_task_name
     params['app'] = CELERY_APP
+    params['misc'].update(other_args)
+    logger.debug("Final param structure : %s", params)
     async_result = async_call(send_task_request, **params)
 
     logger.info(u'"{task}" task submitted for {doc_url} -> UUID = {uuid}'.
@@ -406,7 +417,7 @@ def uuid_task(task, service_route='.'):
 
 def get_canarie_api_response(service_route, canarie_api_request):
     """
-    Provide a valid HTML response for the canarie api request based on the
+    Provide a valid HTML response for the CANARIE API request based on the
     service_route.
 
     :param service_route: Route name of the service coming from the URL e.g. :
@@ -470,7 +481,7 @@ def make_error_response(html_status=None,
     else:
         trace = None
 
-    # If the HTML status is None, use the one provide by the vesta exception
+    # If the HTML status is None, use the one provide by the Vesta exception
     if html_status is None:
         html_status = vesta_exc_instance.get_html_status(real_exception)
 
@@ -484,7 +495,7 @@ def make_error_response(html_status=None,
             # In which case it is removed from the response
             html_status_response = match.group(2)
 
-    # If the vesta exception provide a generic message it will be used in place
+    # If the Vesta exception provide a generic message it will be used in place
     # of the specific message given here
     get_g_msg = vesta_exc_instance.get_generic_message
     generic_vesta_exc_message = get_g_msg(real_exception)
@@ -550,9 +561,9 @@ def make_error_response(html_status=None,
                                 vesta_exc=vesta_exc_log_msg)))
 
     if request_wants_json():
-        # Line break doesn't make sense in json
+        # Line break doesn't make sense in JSON
         vesta_exc_message = vesta_exc_message.replace(u"\\n", u" ")
-        # Replace double quote by single one because json uses double quotes
+        # Replace double quote by single one because JSON uses double quotes
         vesta_exc_message = vesta_exc_message.replace(u'"', u"'")
 
         if is_worker_exc:
@@ -626,7 +637,7 @@ def get_db(name):
     Get a connection to an existing database. If it does not exist, create a
     connection to local sqlite3 file.
 
-    If the local sqlite3 file doesn't exist, init it using a schema.
+    If the local sqlite3 file doesn't exist, initialize it using a schema.
     """
     logger = logging.getLogger(__name__)
     database = getattr(g, '_{0}_database'.format(name), None)

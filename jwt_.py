@@ -14,11 +14,8 @@ import base64
 # -- 3rd party ---------------------------------------------------------------
 import jwt
 
-# -- Project specific --------------------------------------------------------
-from .generic_rest_api import APP
 
-
-def generate_token(duration=None):
+def generate_token(signature_key, audience, algorithm, duration):
     """
     Generate a JWT for the current Token configuration values.
 
@@ -26,11 +23,6 @@ def generate_token(duration=None):
     :returns: Signed Token
     """
     logger = logging.getLogger(__name__)
-    signature_key = APP.config['JWT_SIGNATURE_KEY']
-    audience = APP.config['JWT_AUDIENCE']
-    algorithm = APP.config['JWT_ALGORITHM']
-    if not duration:
-        duration = APP.config['JWT_DURATION']
     delta = timedelta(duration)
 
     decoded_signature = base64.b64decode(signature_key)
@@ -41,16 +33,13 @@ def generate_token(duration=None):
     return signed_token
 
 
-def validate_token(signed_token):
+def validate_token(signed_token, signature_key, audience):
     """
     Check the validity of a token.
 
     :param Signed Token, HS512: HMAC using SHA-512 hash algorithm
     """
     logger = logging.getLogger(__name__)
-
-    signature_key = APP.config['JWT_SIGNATURE_KEY']
-    audience = APP.config['JWT_AUDIENCE']
 
     decoded_signature = base64.b64decode(signature_key)
 
@@ -77,7 +66,16 @@ def main():
                       help='Set token duration')
     options = parser.parse_args()[0]
 
-    token = generate_token(duration=options.token_duration)
+    from .app_objects import APP
+
+    signature_key = APP.config['SECURITY']['JWT']['JWT_SIGNATURE_KEY']
+    audience = APP.config['SECURITY']['JWT']['JWT_AUDIENCE']
+    algorithm = APP.config['SECURITY']['JWT']['JWT_ALGORITHM']
+
+    token = generate_token(signature_key,
+                           audience,
+                           algorithm,
+                           duration=options.token_duration)
     print token
 
 if __name__ == '__main__':

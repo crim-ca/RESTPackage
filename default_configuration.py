@@ -33,30 +33,38 @@ CELERY = {
 
 REQUEST_REGISTER_FN = "static/requests.shelve"
 
-GET_STORAGE_DOC_REQ_URL = ("http://localhost/multimedia_storage"
-                           "/get/{storage_doc_id}")
-POST_STORAGE_DOC_REQ_URL = "http://localhost/multimedia_storage/add"
-POST_ANNOTATIONS_REQ_URL = ("http://localhost/annotation_storage/"
+# security section. For tests without security, put
+# SECURITY = {"BYPASS_SECURITY": True}
+SECURITY = {
+    # Needed for workers to call VLB to obtain resources:
+    'AUTHORISATION_KEY': "aed9yhfapgaegaeg",
+    # Used to configure JSON web token.
+    'JWT': {
+        'JWT_SIGNATURE_KEY': "vJmMvm44x6RJcVXNPy6UDcSfJHOHNHrT1tKpo4IQ4MU=",
+        'JWT_AUDIENCE': "vlbTest",
+        'JWT_ALGORITHM': "HS512",
+        'JWT_DURATION': 600  # The following is specified in seconds.
+    }
+}
+
+GET_STORAGE_DOC_REQ_URL = ("http://localhost:5002/get/{storage_doc_id}")
+POST_STORAGE_DOC_REQ_URL = ("http://localhost:5002/add"
+                            "?service_key=" + SECURITY["AUTHORISATION_KEY"])
+POST_ANNOTATIONS_REQ_URL = ("http://localhost:5001/"
                             "document/{ann_doc_id}/annotations?storageType=2")
-
-JWT_SIGNATURE_KEY = "vJmMvm44x6RJcVXNPy6UDcSfJHOHNHrT1tKpo4IQ4MU="
-JWT_AUDIENCE = "myAudience"
-JWT_ALGORITHM = "HS512"
-JWT_DURATION = 600  # The following is specified in seconds.
-
 
 # -- Specific to VestaLoadBalancer --------------------------------------------
 # In the following definition, every key is a service.
 # Expected values follow this example :
 # 'my_service': {
-#     # Keyword used in the rest api to access this service
+#     # Keyword used in the rest API to access this service
 #     # (ex.: http://server/<route_keyword>/info)
 #     # Set to '.' to access this service without keyword
 #     # (ex.: http://server/info)
 #     'route_keyword': 'my_service',
 #
 #     # The celery task name.
-#     # Must match the task in the worker app name : <proj_name>.<task_name>
+#     # Must match the task in the worker APP name : <proj_name>.<task_name>
 #     # (ex.: worker.my_service)
 #     'celery_task_name': 'my_service',
 #
@@ -111,7 +119,7 @@ BROKER_ADMIN_PORT = '15672'
 BROKER_ADMIN_UNAME = 'guest'
 BROKER_ADMIN_PASS = 'guest'
 
-# OpenStack acces configuration.
+# OpenStack access configuration.
 OPS_CONFIG = {'name': 'My OpenStack',
               'cloud_type': 'OpenStack',  # Important so we use the right API.
               'networks': ['ops_net_name'],
@@ -127,17 +135,20 @@ RUBBER_MAX_VM_QTY = 50  # Maximum number of Virtual machines we can spawn.
 # Default seconds to wait between elasticity evaluations:
 RUBBER_EVAL_INTERVAL = 120
 RUBBER_MIN_IDLE_WORKERS = 1
-# Time after which a non-functionnal VM will be terminated:
+# Time after which a non-functional VM will be terminated:
 RUBBER_SLACKER_TIME_THRESHOLD = 300
 
 FLOWER_API_URL = "http://localhost:5555/api"
 
 MSS = {
     'SWIFT': {
+        # shh certificate to connect to remote computer if SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
         'certificate_filename': 'dir/to/the/certificate.pem',
+        # remote computer address if SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
         'token_server': 'localhost',
+        # user if SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
         'token_server_user': 'user',
-        'os-auth-url': 'http://swift.ca:5000/v2.0',
+        'os-auth-url': 'http://localhost:8080/v2.0',
         'os-tenant-name': 'tenant',
         'os-username': 'username',
         'os-password': 'password',
@@ -149,6 +160,11 @@ MSS = {
     # Swift token renewal frequency (Twice a day)
     'TOKEN_RENEWAL_FREQ': 43200,
 
-    # Temp url validity (One day)
-    'TEMP_URL_DEFAULT_VALIDITY': 86400
+    # Temp URL validity (One day)
+    'TEMP_URL_DEFAULT_VALIDITY': 86400,
+    # Describes the API used to access swift. The options are V1_LOCAL for Docker local swift, V2 for standard V2 api, and V2_REMOTE when a remote ssh host is used to get swift credentials.
+    'SWIFT_AUTHENTIFICATION_OPTIONS': 'V1_LOCAL',
+    'SWIFT_REDIRECT_URL': 'http://localhost:8080',
+    # Part of the auth url to ignore when returning a swift access url for the client.
+    'STORAGE_URL_IGNORE_PREFIX_FOR_TEMP_URL': 'swift'
     }
