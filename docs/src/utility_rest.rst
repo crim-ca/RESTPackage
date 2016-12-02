@@ -1,7 +1,7 @@
 REST front-end utilities
 ========================
 
-.. automodule:: utility_rest
+.. automodule:: VestaRestPackage.utility_rest
    :members: 
 
 .. todolist::

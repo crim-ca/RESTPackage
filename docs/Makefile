@@ -49,13 +49,13 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
-install:
-	rsync -av --progress _build/html/ ~/public_html/LoadBalDocs
-
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+install: html
+	./sync.py
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
