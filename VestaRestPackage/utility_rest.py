@@ -32,10 +32,10 @@ from flask import Markup
 from flask import g
 
 # -- Project specific --------------------------------------------------------
-from .Service.request_process_mesg import (WorkerExceptionWrapper,
-                                           send_task_request,
-                                           get_request_info,
-                                           cancel_request)
+from Service.request_process_mesg import (WorkerExceptionWrapper,
+                                          send_task_request,
+                                          get_request_info,
+                                          cancel_request)
 from .vesta_exceptions import (DocumentUrlNotValidException,
                                MissingParameterError,
                                VersionMismatchError,
