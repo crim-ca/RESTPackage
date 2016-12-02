@@ -3,7 +3,7 @@
 
 
 """
-This module configures the celery app using proper config params.
+This module configures the Celery app using proper config params.
 """
 
 
@@ -20,14 +20,15 @@ def configure(config):
     A given service name will have its requests route through a queue named
     like the REST route.
 
+    :param config: Dict like object with Celery configuration values.
     :returns: Reference to the Celery application to keep handy.
     """
     logger = logging.getLogger(__name__)
 
     proj_name = config['CELERY_PROJ_NAME']
+    logger.debug("Celery project name is {0}".format(proj_name))
     celery_app = Celery(proj_name)
     celery_app.config_from_object(config['CELERY'])
-    # celery_app.conf.update(config['CELERY'])
 
     celery_routes = dict()
 

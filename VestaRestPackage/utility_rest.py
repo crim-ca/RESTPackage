@@ -2,8 +2,9 @@
 # coding:utf-8
 
 """
-This module is a collection of utility functions used by the rest_route module
-placed here to keep the rest_route module as clear as possible.
+This module is a collection of utility functions used mainly by the rest_route
+module and which are placed here to keep the rest_route module as clean as
+possible.
 """
 
 
@@ -32,10 +33,10 @@ from flask import Markup
 from flask import g
 
 # -- Project specific --------------------------------------------------------
-from Service.request_process_mesg import (WorkerExceptionWrapper,
-                                          send_task_request,
-                                          get_request_info,
-                                          cancel_request)
+from VestaService.request_process_mesg import (WorkerExceptionWrapper,
+                                               send_task_request,
+                                               get_request_info,
+                                               cancel_request)
 from .vesta_exceptions import (DocumentUrlNotValidException,
                                MissingParameterError,
                                VersionMismatchError,
@@ -48,7 +49,7 @@ from .app_objects import APP, CELERY_APP
 
 def request_wants_json():
     """
-    Check if the request type is JSON
+    Check if the request type is of type JSON.
 
     The default mimetype */* is interpreted as JSON.
     """
@@ -61,9 +62,26 @@ def request_wants_json():
     return best == 'application/json'
 
 
+def request_wants_xml():
+    """
+    Check if the request type is of type XML.
+
+    The default mimetype */* is interpreted as JSON.
+    """
+
+    # Best will be JSON if it's in accepted mimetypes and
+    # has a quality greater or equal to HTML.
+    # For */* both JSON and HTML will have the same quality so JSON still win
+    choices = ['application/json', 'text/html', 'application/xml']
+    best = request.accept_mimetypes.best_match(choices)
+    return best == 'application/xml'
+
+
 def set_html_as_default_response():
     """
-    By default if the accept mimetypes contains */*, JSON format will be used.
+    By default if the accepted mimetypes contains */*, JSON format will be
+    used.
+
     By calling this function, the */* mimetype will be changed explicitly into
     text/html so that it becomes the mimetype used by default.
     """
@@ -88,7 +106,7 @@ def validate_service_route(service_route):
     :param service_route: Route name of the service coming from the URL e.g.:
                           ['diarisation', 'stt', etc.]
     :returns: Service name associated with the route
-    :raises: UnknownServiceError
+    :raises: :py:exc:`~.vesta_exceptions.UnknownServiceError`
     """
     if service_route not in APP.config['WORKER_SERVICES']:
         raise UnknownServiceError(service_route)
@@ -134,8 +152,9 @@ def validate_state(uuid, service_name, state):
     :param service_name: Name of the service which is requested.
     :type service_name: string
     :param state: The state of the task
-    :type state: dict containing task status
-    :raises: VersionMismatchError in case of a version mismatch
+    :type state: Dictionary containing task status
+    :raises: :py:exc:`~.vesta_exceptions.VersionMismatchError` in case of a
+       version mismatch
     """
     logger = logging.getLogger(__name__)
     select_query = ('select activity from requests where '
@@ -179,9 +198,9 @@ def validate_state(uuid, service_name, state):
         decl_ver = APP.config['WORKER_SERVICES'][service_name]['version']
 
         if payload_ver != decl_ver:
-            msg = (u'Service {serv} declares the version {decl_ver} '
-                   u'in its config file but messages received from its worker '
-                   u'contain the version {payload_ver}.'
+            msg = ('Service {serv} declares the version {decl_ver} '
+                   'in its config file but messages received from its worker '
+                   'contain the version {payload_ver}.'
                    .format(serv=service_name,
                            decl_ver=decl_ver,
                            payload_ver=payload_ver))
@@ -224,13 +243,13 @@ def async_fct_wrapper(out_dict, fct, *args, **kwargs):
 
 def async_call(fct, *args, **kwargs):
     """
-    Call AMQP functions with any arg or kwargs in an asynchronous manner
+    Call AMQP functions with any arg or kwargs in an asynchronous manner.
 
     :param fct: The function to call asynchronously
     :param args: Arguments
     :param kwargs: Keyword arguments
     :return: The function output
-    :raises: AMQPError if a timeout occurs
+    :raises: :py:exc:`~.vesta_exceptions.AMQPError`  if a timeout occurs
     """
     out_dict = {'return_value': None, 'exception': None}
     args_augmented = (out_dict, fct)
@@ -252,7 +271,7 @@ def async_call(fct, *args, **kwargs):
 
 def get_request_url(request_type, kwargs):
     logger = logging.getLogger(__name__)
-    logger.debug("Args are : {0}".format(kwargs))
+    logger.debug("Arguments are : {0}".format(kwargs))
     request_url = APP.config[request_type]
     return request_url.format(**kwargs)
 
@@ -277,6 +296,7 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
     :param service_route: service route to obtain the requested service name
     :param extra_params: Extra parameters that are passed to send_task_request
     :returns: JSON object with the task UUID or error response.
+    :raises: :py:exc:`~.vesta_exceptions.MissingParameterError`
     """
     logger = logging.getLogger(__name__)
     service_name = validate_service_route(service_route)
@@ -366,6 +386,9 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
         if not is_storage_arg(key) and not is_url_arg(key):
             other_args[key] = value
 
+    # Add this so that all workers can know where the default associated
+    # storage server is located.
+    other_args['upload_url'] = APP.config['POST_STORAGE_DOC_REQ_URL']
     logger.debug("Other arbitrary arguments: %s", other_args)
 
     worker_config = APP.config['WORKER_SERVICES'][service_name]
@@ -394,6 +417,7 @@ def uuid_task(task, service_route='.'):
     :param task: status or cancel
     :param service_route: service route to obtain the requested service name
     :returns: JSON object with latest status or error response.
+    :raises: :py:exc:`~.vesta_exceptions.MissingParameterError`
     """
     logger = logging.getLogger(__name__)
     service_name = validate_service_route(service_route)
@@ -412,7 +436,7 @@ def uuid_task(task, service_route='.'):
         async_call(cancel_request, request_uuid, CELERY_APP)
     state = async_call(get_request_info, request_uuid, CELERY_APP)
     state = validate_state(request_uuid, service_name, state)
-    return jsonify(state)
+    return state
 
 
 def get_canarie_api_response(service_route, canarie_api_request):
@@ -461,7 +485,8 @@ def make_error_response(html_status=None,
                 from the vesta_exception (at least one of html_status or
                 vesta_exception must be provided)
     :param html_status_response: Standard message associated with a status
-                code. Obtained via httplib if not provided.
+                code. Obtained via :py:data:`httplib.responses` if not
+                provided.
     :param vesta_exception: Vesta exception instance used to obtain an
                 exception code. Generic one is used if not provided.
     """
@@ -701,11 +726,18 @@ class AnyIntConverter(BaseConverter):
     """
     Matches one of the items provided.
 
-    Items must be integer and comma separated with space
-    to avoid confusion with floating point value in the parser
+    Items must be integer and comma separated with a space to avoid confusion
+    with floating point value in the parser.
 
-    Ex.: 1, 2, 3
-    And not 1,2,3 because it will parse as float 1,2 and 3
+    For example::
+
+       1, 2, 3
+
+    And not::
+
+       1,2,3
+
+    Since it would parse as float 1,2 and 3 .
     """
 
     def __init__(self, mapping, *items):

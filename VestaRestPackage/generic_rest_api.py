@@ -9,8 +9,8 @@
 # will depend.
 
 """
-This module defines the generic REST API for vesta services as defined by the
-CANARIE API specification. See :
+This module defines the generic REST API for annotation services as defined by
+the CANARIE API specification. See :
 https://collaboration.canarie.ca/elgg/file/download/849
 """
 
@@ -38,7 +38,6 @@ from .utility_rest import request_wants_json
 from .reverse_proxied import ReverseProxied
 from .utility_rest import get_requests_db
 from .utility_rest import AnyIntConverter
-from . import self_test
 from . import __meta__
 
 # Handle Reverse Proxy setups
@@ -99,7 +98,9 @@ def handle_exceptions(exception_instance):
     if APP.debug:
         logger.info(u"In debug mode, re-raising exception")
         raise
-    return make_error_response(vesta_exception=exception_instance)
+    return make_error_response(html_status=exception_instance.status_code,
+                               html_status_response=exception_instance.message,
+                               vesta_exception=exception_instance)
 
 # -- Flask routes ------------------------------------------------------------
 APP.url_map.converters['any_int'] = AnyIntConverter
@@ -112,8 +113,9 @@ def extern_html_error_handler(status_code_str):
     that it uses this route for handling errors.
 
     For this add this line for each handled html errors in the Apache
-    configuration:
-    ErrorDocument 400 <Rest root>/400
+    configuration::
+
+       ErrorDocument 400 <Rest root>/400
     """
     return make_error_response(html_status=int(status_code_str))
 
@@ -134,7 +136,7 @@ def global_info():
 def info(service_route='.'):
     """
     Required by CANARIE
-    A service can define it's service_route as '.', in which case, the url
+    A service can define it's service_route as '.', in which case, the URL
     doesn't have to contain a route token
     """
     logger = logging.getLogger(__name__)
@@ -200,7 +202,7 @@ def info(service_route='.'):
 def stats(service_route='.'):
     """
     Required by CANARIE.
-    A service can define it's service_route as '.', in which case, the url
+    A service can define it's service_route as '.', in which case, the URL
     doesn't have to contain a route token
     """
     logger = logging.getLogger(__name__)
@@ -239,7 +241,7 @@ def stats(service_route='.'):
 def simple_requests_handler(api_request='home', service_route='.'):
     """
     Handle simple requests required by CANARIE
-    A service can define it's service_route as '.', in which case, the url
+    A service can define it's service_route as '.', in which case, the URL
     doesn't have to contain a route token
     """
 
@@ -259,7 +261,7 @@ def configure_home_route():
     """
     logger = logging.getLogger(__name__)
     logger.debug(u"Current configuration is : {0}".format(APP.config))
-    logger.info("Root path is {0}".format(APP.root_path))
+    logger.debug("Root path is {0}".format(APP.root_path))
     logger.info("Static path is {0}".format(APP.static_folder))
 
     known_services_routes = APP.config['WORKER_SERVICES'].keys()
@@ -274,24 +276,6 @@ def configure_home_route():
         APP.add_url_rule(rule, None, simple_requests_handler)
 
     logger.debug("Flask url map: {0}".format(APP.url_map))
-
-
-@APP.route("/self_test")
-def run_self_test():
-    """
-    Run self-tests through HTTP interface and return results.
-    """
-    logger = logging.getLogger(__name__)
-    logger.info(u"Running self-tests")
-    return self_test.get_result()
-
-
-@APP.route("/self_test/<int:test_code>")
-def self_test_code(test_code):
-    """
-    Obtain error handler for error code.
-    """
-    return self_test.test_error_code(APP, test_code)
 
 
 @APP.teardown_appcontext

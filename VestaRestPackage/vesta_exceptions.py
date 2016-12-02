@@ -35,9 +35,10 @@ class VestaExceptions(object):
     """
     Exceptions register class.
     """
+
     def __init__(self):
         """
-        Populate the known exceptions list
+        Populate the known exceptions list.
         """
 
         self._known_exceptions = [
@@ -160,7 +161,7 @@ class VestaExceptions(object):
 
     def get_exception_code(self, exception):
         """
-        Returns the Vesta exception code associated to this exception
+        Returns the Vesta exception code associated to this exception.
 
         :param exception: Exception instance
         :returns: Exception code
@@ -169,7 +170,7 @@ class VestaExceptions(object):
 
     def get_html_status(self, exception):
         """
-        Returns the html status code associated to this exception
+        Returns the html status code associated to this exception.
 
         :param exception: Exception instance
         :returns: HTML status code
@@ -178,7 +179,7 @@ class VestaExceptions(object):
 
     def get_generic_message(self, exception):
         """
-        Returns the generic message associated to this exception
+        Returns the generic message associated to this exception.
 
         :param exception: Exception instance
         :returns: Exception message
@@ -190,12 +191,24 @@ class VRPException(Exception):
     """
     Base exception type for current package.
     """
-    pass
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
 
 
 class UnknownServiceError(VRPException):
     """
-    Service name is of unknown type
+    Indicates that a Service name is of unknown type.
     """
     def __init__(self, service):
         msg = ('The request has been made for a service that is not supported'
@@ -205,7 +218,7 @@ class UnknownServiceError(VRPException):
 
 class UnknownUUIDError(VRPException):
     """
-    Indicating that the requested UUID is not yet registered.
+    Indicates that the requested UUID is not yet registered.
     """
     def __init__(self, uuid):
         msg = ('User requested a UUID which did not exist : {uuid}'
@@ -215,7 +228,7 @@ class UnknownUUIDError(VRPException):
 
 class MissingParameterError(VRPException):
     """
-    Indicating that a required parameter is missing.
+    Indicates that a required parameter is missing.
     """
     def __init__(self, method, uri, missing_param):
         msg = ('A {method} on the URI "{uri}" requires the following '
@@ -227,24 +240,24 @@ class MissingParameterError(VRPException):
 
 class VersionMismatchError(VRPException):
     """
-    Indicating that a service version declare in rest config mismatch the
-    version obtained from worker message payload.
+    Indicates that a service version declared in the REST configuration
+    mismatches the version obtained from worker message payload.
     """
     pass
 
 
 class AMQPError(VRPException):
     """
-    Indicating that a communication with amqp failed.
+    Indicates that communications with AMQP failed.
     """
     def __init__(self):
-        msg = "Amqp backend did't response quickly enough."
+        msg = "AMQP backend didn't response quickly enough."
         super(AMQPError, self).__init__(msg)
 
 
 class DocumentUrlNotValidException(VRPException):
     """
-    Indicating that a communication with amqp failed.
+    Indicates that given URL for a document is invalid.
     """
     def __init__(self, invalid_url):
         msg = ('User provided an invalid source URL : {url}'
@@ -254,7 +267,7 @@ class DocumentUrlNotValidException(VRPException):
 
 class SettingsException(VRPException):
     """
-    Indicates that an error occured with the parsing of the settings.
+    Indicates that an error occurred during settings parsing.
     """
     pass
 

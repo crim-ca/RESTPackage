@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # coding:utf-8
 
-
 """
-This module implements a middleware that makes the flask application work
+This module implements a middleware that makes the Flask application work
 seamlessly behind a reverse proxy.
 """
 

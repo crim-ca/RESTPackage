@@ -9,6 +9,8 @@ need to override for the keys found within.
 To have the programs in the package override the values with the values
 found in this file, you need to set the environment variable named
 "VRP_CONFIGURATION" to the path of your own copy before launching the program.
+
+See also :py:mod:`~.VestaRestPackage.print_example_configuration`.
 """
 
 MY_SERVER_NAME = "localhost"
