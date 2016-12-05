@@ -21,11 +21,16 @@ else:
     HISTORY = ""
 
 REQUIREMENTS = [
-    "VestaService==0.2.0",
+    "Flask==0.10.1",
+    "pyrabbit==1.0.1",
+    "PyJWT==0.4.3",
+    "python-novaclient",
+    "dicttoxml==1.6.6",
+    "VestaService==0.2.0"
 ]
 
 TEST_REQUIREMENTS = [
-    'nose',
+    'nose'
 ]
 
 setup(
@@ -47,11 +52,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 2.7'
     ],
 
     # -- Package structure -------------------------------------------------
@@ -65,5 +66,5 @@ setup(
 
     # -- self - tests --------------------------------------------------------
     test_suite='tests',
-    tests_require=TEST_REQUIREMENTS,
+    tests_require=TEST_REQUIREMENTS
 )
