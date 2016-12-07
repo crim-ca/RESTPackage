@@ -17,4 +17,4 @@ Known examples of applications which use this package are:
 
 Installation of this package can be done as follows::
 
-   pip install -r requirements.txt .
+   pip install VestaRestPackage
