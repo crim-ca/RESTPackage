@@ -1,0 +1,22 @@
+language: python
+
+python: 2.7
+env:
+  - TOXENV=py27
+
+install:
+  - pip install -U tox
+
+script:
+  - tox
+
+# deploy:
+#   provider: pypi
+#   distributions: sdist
+#   user: www-crim-ca-devs
+#   password:
+#     secure: PLEASE_REPLACE_ME
+#   on:
+#     tags: true
+#     repo: audreyr/python_boilerplate
+#     condition: $TOXENV == py27
