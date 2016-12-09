@@ -1,3 +1,5 @@
+Current test status : https://travis-ci.org/crim-ca/RESTPackage.svg?branch=master
+
 This package offers helper modules for exposing services working in a
 distributed Service architecture through a REST interface. The work being
 executed by these services might be an annotation process or a form of
