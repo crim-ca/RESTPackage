@@ -8,13 +8,17 @@ possible.
 """
 
 
+import future
+from future.standard_library import install_aliases
+install_aliases()
+
 # -- Standard lib ------------------------------------------------------------
-from urlparse import urlparse
-import ConfigParser
-from os import path
+import configparser as ConfigParser
+from urllib.parse import urlparse
+import http.client as httplib
+from os import path, getcwd
 import traceback
 import threading
-import httplib
 import sqlite3
 import logging
 import sys
@@ -128,8 +132,8 @@ def validate_uuid(uuid, service_name):
     logger = logging.getLogger(__name__)
     query = 'select count(*) from requests where service = ? and uuid = ?'
 
-    logger.debug(u"Accessing information for request «{0}» to {1}"
-                 .format(uuid, service_name))
+    logger.debug("Accessing information for request «%s» to %s",
+                 uuid, service_name)
 
     database = get_requests_db()
     cur = database.execute(query, [service_name, uuid])
@@ -159,9 +163,8 @@ def validate_state(uuid, service_name, state):
     logger = logging.getLogger(__name__)
     select_query = ('select activity from requests where '
                     'service = ? and uuid = ?')
-    logger.debug(u"Verifying the activity flag in DB "
-                 u"for request «{0}» to {1}"
-                 .format(uuid, service_name))
+    logger.debug("Verifying the activity flag in DB "
+                 "for request «%s» to %s", uuid, service_name)
 
     database = get_requests_db()
     cur = database.execute(select_query, [service_name, uuid])
@@ -175,9 +178,9 @@ def validate_state(uuid, service_name, state):
         if activity_flag:
             state['status'] = 'EXPIRED'
 
-            logger.debug(u'Status of task {0} for {1} is reported as PENDING, '
-                         u'but the task has been running. The task queue has '
-                         u'EXPIRED'.format(uuid, service_name))
+            logger.debug('Status of task %s for %s is reported as PENDING, '
+                         'but the task has been running. The task queue has '
+                         'EXPIRED', uuid, service_name)
 
     elif not activity_flag:
         # The task is being executed: Ensure that the activity flag is on.
@@ -185,9 +188,8 @@ def validate_state(uuid, service_name, state):
         update_query = ('update requests set activity=? where '
                         'service = ? and uuid = ?')
 
-        logger.debug(u"Turning on the activity flag in db "
-                     u"of task «{0}» for {1}"
-                     .format(uuid, service_name))
+        logger.debug("Turning on the activity flag in db "
+                     "of task «%s» for %s", uuid, service_name)
 
         cur = database.execute(update_query, [True, service_name, uuid])
         cur.close()
@@ -221,8 +223,7 @@ def store_uuid(uuid, service_name):
     logger = logging.getLogger(__name__)
     query = 'insert into requests values(CURRENT_TIMESTAMP, ?, ?, ?)'
 
-    logger.debug(u"Keeping track of request «{0}» for {1}".
-                 format(uuid, service_name))
+    logger.debug("Keeping track of request «%s» for %s", uuid, service_name)
 
     database = get_requests_db()
     cur = database.execute(query, [service_name, uuid, False])
@@ -233,10 +234,10 @@ def store_uuid(uuid, service_name):
 def async_fct_wrapper(out_dict, fct, *args, **kwargs):
     logger = logging.getLogger(__name__)
     try:
-        logger.debug("args : {0}".format(args))
-        logger.debug("kwargs : {0}".format(kwargs))
+        logger.debug("args : %s", args)
+        logger.debug("kwargs : %s", kwargs)
         out_dict['return_value'] = fct(*args, **kwargs)
-        logger.debug("out_dict : {o}".format(o=out_dict))
+        logger.debug("out_dict : %s", out_dict)
     except:
         out_dict['exception'] = sys.exc_info()
 
@@ -264,14 +265,14 @@ def async_call(fct, *args, **kwargs):
 
     if out_dict['exception'] is not None:
         exc = out_dict['exception']
-        raise exc[0], exc[1], exc[2]
+        raise exc[0](exc[1]).with_traceback(exc[2])
 
     return out_dict['return_value']
 
 
 def get_request_url(request_type, kwargs):
     logger = logging.getLogger(__name__)
-    logger.debug("Arguments are : {0}".format(kwargs))
+    logger.debug("Arguments are : %s", kwargs)
     request_url = APP.config[request_type]
     return request_url.format(**kwargs)
 
@@ -281,7 +282,7 @@ def validate_url(url):
     Check if URL is invalid.
     """
     logger = logging.getLogger(__name__)
-    logger.debug(u"Validating URL : {0}".format(url))
+    logger.debug("Validating URL : %s", url)
     url_p = urlparse(url)
     if not url_p.scheme or not url_p.netloc or not url_p.path:
         raise DocumentUrlNotValidException(url)
@@ -318,64 +319,67 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
         # request.values combines values from arguments and form
         doc_url = request.values['doc_url']
 
-        logger.info(u'Submitting "{task}" task with public url : {url}'
-                    .format(task=friendly_task_name, url=doc_url))
+        logger.info('Submitting "%s" task with public url : %s',
+                    friendly_task_name, doc_url)
     else:
         doc_url = get_request_url('GET_STORAGE_DOC_REQ_URL',
                                   {'storage_doc_id': storage_doc_id})
 
-        logger.info(u'Submitting "{task}" task with storage doc id : {doc_id}'
-                    .format(task=friendly_task_name, doc_id=storage_doc_id))
+        logger.info('Submitting "%s" task with storage doc id : %s',
+                    friendly_task_name, storage_doc_id)
 
     validate_url(doc_url)
 
     # For all storage_*_id given in request.values, resolve them if necessary
     # and add them to the misc data holder to async_call
-    is_storage_arg = lambda x: x.startswith('storage_') and x.endswith('_id')
-    is_url_arg = lambda x: x.endswith('_url') and x != 'doc_url'
+    def is_storage_arg(x):
+        return x.startswith('storage_') and x.endswith('_id')
 
-    storage_args = filter(is_storage_arg, request.values.keys())
-    url_args = filter(is_url_arg, request.values.keys())
+    def is_url_arg(x):
+        return x.endswith('_url') and x != 'doc_url'
+
+    storage_args = list(filter(is_storage_arg, list(request.values.keys())))
+    url_args = list(filter(is_url_arg, list(request.values.keys())))
 
     if 'misc' not in params:
         logger.debug("Initialising empty dict for absent misc structure")
         params['misc'] = {}
 
     if storage_args or url_args:
-        logger.debug(u"{l} arguments referencing storage ids: {a}".
-                     format(l=len(storage_args), a=storage_args))
+        logger.debug("%s arguments referencing storage ids: %s",
+                     len(storage_args), storage_args)
 
         for storage_arg in storage_args:
             url_ = None
             # E.g.: If "storage_txt_id" then doctype == 'txt'
             doctype = storage_arg.split('_')[1]
             direct_url_arg = "{0}_url".format(doctype)
-            if direct_url_arg in request.values.keys():
+            if direct_url_arg in list(request.values.keys()):
                 # Here we could also consider raising an exception.
-                logger.warning(u"Conflicting arguments {0} and {1}, "
-                               u"defaulting to {1}".
-                               format(storage_arg, direct_url_arg))
+                logger.warning("Conflicting arguments %s and %s, "
+                               "defaulting to %s".
+                               storage_arg, direct_url_arg, direct_url_arg)
                 # Preference given to the direct URL
                 url_ = request.values[direct_url_arg]
             else:
                 id_ = request.values[storage_arg]
                 url_ = get_request_url('GET_STORAGE_DOC_REQ_URL',
                                        {'storage_doc_id': id_})
-                logger.debug(u"Resolving URL for id {0} of type {1}: {2}".
-                             format(id_, doctype, url_))
+                logger.debug("Resolving URL for id %s of type %s: %s",
+                             id_, doctype, url_)
 
             validate_url(url_)
-            logger.info(u"Using argument {0}={1}".format(storage_arg, url_))
+            logger.info("Using argument %s=%s", storage_arg, url_)
             params['misc'][direct_url_arg] = url_
 
         # For all *_url given in request.values, add them to the misc data
         # holder to async_call
-        logger.debug(u"{l} arguments referencing direct URLs other than"
-                     u" doc_url: {u}".format(l=len(url_args), u=url_args))
+        logger.debug("%s arguments referencing direct URLs other than"
+                     " doc_url: %s", len(url_args), url_args)
         for url_arg in url_args:
             url_ = request.values[url_arg]
             validate_url(url_)
-            logger.info(u"Using argument {0}={1}".format(url_arg, url_))
+            logger.info("Using argument %s=%s", url_arg, url_)
             params['misc'][url_arg] = url_
 
     log_request(service_name, 'POST {request} request on {doc_url}'
@@ -400,10 +404,8 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
     logger.debug("Final param structure : %s", params)
     async_result = async_call(send_task_request, **params)
 
-    logger.info(u'"{task}" task submitted for {doc_url} -> UUID = {uuid}'.
-                format(task=friendly_task_name,
-                       doc_url=doc_url,
-                       uuid=async_result.task_id))
+    logger.info('"%s" task submitted for %s -> UUID = %s',
+                friendly_task_name, doc_url, async_result.task_id)
 
     store_uuid(async_result.task_id, service_name)
 
@@ -428,8 +430,8 @@ def uuid_task(task, service_route='.'):
     log_request(service_name, '{op} on {uuid}'.format(op=task,
                                                       uuid=request_uuid))
 
-    logger.info(u'{task} request on task {uuid} for {serv}'.
-                format(task=task, uuid=request_uuid, serv=service_name))
+    logger.info('%s request on task %s for %s',
+                task, request_uuid, service_name)
     validate_uuid(request_uuid, service_name)
 
     if task == 'cancel':
@@ -527,9 +529,9 @@ def make_error_response(html_status=None,
     if generic_vesta_exc_message is not None:
         vesta_exc_message = generic_vesta_exc_message
     elif real_exception:
-        vesta_exc_message = unicode(real_exception)
+        vesta_exc_message = str(real_exception)
     else:
-        vesta_exc_message = u''
+        vesta_exc_message = ''
 
     # Retrieve exception context from the traceback
     if trace is not None:
@@ -555,41 +557,41 @@ def make_error_response(html_status=None,
                 filename = path.basename(match.group(1))
                 line = match.group(2)
                 fct = match.group(3)
-                exc_context = u'{file}:{line} in {fct}'.format(file=filename,
-                                                               line=line,
-                                                               fct=fct)
-                vesta_exc_message += u' [{0}]'.format(exc_context)
+                exc_context = '{file}:{line} in {fct}'.format(file=filename,
+                                                              line=line,
+                                                              fct=fct)
+                vesta_exc_message += ' [{0}]'.format(exc_context)
 
     get_x_code = vesta_exc_instance.get_exception_code
     vesta_exception_code = get_x_code(real_exception)
 
-    html_response_header = (u'{status} : {resp}'
+    html_response_header = ('{status} : {resp}'
                             .format(status=html_status,
                                     resp=html_status_response))
 
     if real_exception is not None:
-        vesta_exc_log_msg = (u'{code} : {info}'
+        vesta_exc_log_msg = ('{code} : {info}'
                              .format(code=vesta_exception_code,
                                      info=vesta_exc_message))
-        logger.info(u'The following exception has been raised : '
-                    u'{{{type}}} : {msg}'
-                    .format(type=type(real_exception).__name__,
-                            msg=unicode(real_exception)))
+        logger.info('The following exception has been raised : '
+                    '%s : %s',
+                    type(real_exception).__name__,
+                    str(real_exception))
     else:
         vesta_exc_log_msg = ''
 
-    logger.info(u'An error response is returned to the request {req} :'
-                u' {resp}'
-                .format(req=request.url,
-                        resp=u'[{html_resp}] {vesta_exc}'
-                        .format(html_resp=html_response_header,
-                                vesta_exc=vesta_exc_log_msg)))
+    logger.info('An error response is returned to the request %s :'
+                ' %s',
+                request.url,
+                '[{html_resp}] {vesta_exc}'.
+                format(html_resp=html_response_header,
+                       vesta_exc=vesta_exc_log_msg))
 
     if request_wants_json():
         # Line break doesn't make sense in JSON
-        vesta_exc_message = vesta_exc_message.replace(u"\\n", u" ")
+        vesta_exc_message = vesta_exc_message.replace("\\n", " ")
         # Replace double quote by single one because JSON uses double quotes
-        vesta_exc_message = vesta_exc_message.replace(u'"', u"'")
+        vesta_exc_message = vesta_exc_message.replace('"', "'")
 
         if is_worker_exc:
             status_response = {
@@ -616,14 +618,14 @@ def make_error_response(html_status=None,
     else:
         # Escapes message properly for HTML
         html_escape_table = {
-            u'&': u'&amp;',
-            u'"': u'&quot;',
-            u"'": u'&apos;',
-            u'>': u'&gt;',
-            u'<': u'&lt;'
+            '&': '&amp;',
+            '"': '&quot;',
+            "'": '&apos;',
+            '>': '&gt;',
+            '<': '&lt;'
         }
-        vesta_exc_log_msg = u''.join(html_escape_table.get(c, c) for c
-                                     in vesta_exc_log_msg)
+        vesta_exc_log_msg = ''.join(html_escape_table.get(c, c) for c
+                                    in vesta_exc_log_msg)
 
         # Replace break line by the HTML <br> symbol
         vesta_exc_log_msg = vesta_exc_log_msg.replace('\n', '<br>')
@@ -670,11 +672,13 @@ def get_db(name):
         d_fn = APP.config['DATABASES'][name]['filename']
         database_fn = None
         if path.isabs(d_fn):
+            logger.debug("Considering database fn as is/absolute")
             database_fn = d_fn
         else:
-            database_fn = path.join(APP.root_path, d_fn)
+            logger.debug("Prepending CWD to database filename")
+            database_fn = path.join(getcwd(), d_fn)
 
-        logger.debug(u"Using db filename : {0}".format(database_fn))
+        logger.debug("Using db filename : %s", database_fn)
         if not path.exists(database_fn):
             database = g._database = sqlite3.connect(database_fn)
             init_db(database, name)
@@ -689,7 +693,7 @@ def init_db(database, name):
     Initialize a database from a schema
     """
     logger = logging.getLogger(__name__)
-    logger.info(u"Initializing {0} database".format(name))
+    logger.info("Initializing %s database", name)
     with current_app.app_context():
         dbs_fn = APP.config['DATABASES'][name]['schema_filename']
         schema_fn = None
@@ -698,7 +702,7 @@ def init_db(database, name):
         else:
             schema_fn = path.join(APP.root_path, dbs_fn)
 
-        logger.debug(u"Using schema filename : {0}".format(schema_fn))
+        logger.debug("Using schema filename : %s", schema_fn)
         with current_app.open_resource(schema_fn, mode='r') as schema_f:
             database.cursor().executescript(schema_f.read())
         database.commit()
@@ -714,7 +718,7 @@ def log_request(service_name, url):
     logger = logging.getLogger(__name__)
     query = 'insert into invocations values(CURRENT_TIMESTAMP, ?, ?, ?)'
 
-    logger.info(u"Log into DB : {0}".format(query))
+    logger.info("Log into DB : %s", query)
 
     database = get_invocations_db()
     cur = database.execute(query, [service_name, request.remote_addr, url])

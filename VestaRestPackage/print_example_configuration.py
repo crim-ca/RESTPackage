@@ -23,7 +23,7 @@ def main():
     Script entry point: Print out default configuration on standard out.
     """
     contents = open(join(THIS_DIR, 'default_configuration.py')).read()
-    print contents
+    print(contents)
 
 if __name__ == '__main__':
     main()

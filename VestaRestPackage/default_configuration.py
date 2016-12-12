@@ -18,10 +18,10 @@ MY_SERVER_NAME = "localhost"
 # Database name relative to the current application directory
 DATABASES = {
     'Invocations': {
-        'filename': "../static/service_invocations.db",
+        'filename': "service_invocations.db",
         'schema_filename': "../static/service_invocations_schema.sql"},
     'Requests': {
-        'filename': "../static/requests.db",
+        'filename': "requests.db",
         'schema_filename': "../static/requests_schema.sql"}}
 
 CELERY_PROJ_NAME = "worker"

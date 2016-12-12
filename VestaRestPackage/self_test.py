@@ -18,8 +18,9 @@ from VestaRestPackage.app_objects import APP
 class VRPTestCase(TestCase):
 
     def setUp(self):
-        self.db_fd, APP.config['DATABASE'] = tempfile.mkstemp()
         self.logger = getLogger(__name__)
+
+        self.db_fd, APP.config['DATABASE'] = tempfile.mkstemp()
         APP.config['TESTING'] = True
         APP.config['SERVER_NAME'] = 'localhost'
 

@@ -1,5 +1,7 @@
+import future
+
 # -- Standard lib ------------------------------------------------------------
-import httplib
+import http.client as httplib
 
 # -- Project specific --------------------------------------------------------
 from . import singleton
@@ -62,16 +64,16 @@ class VestaExceptions(object):
             ExceptionInfo(code=200, exc_type='SettingsException'),
             ExceptionInfo(code=201, exc_type='VersionException'),
             ExceptionInfo(code=202, exc_type='UnknownServiceError',
-                          status=httplib.BAD_REQUEST),
+                          status=http.client.BAD_REQUEST),
             ExceptionInfo(code=203, exc_type='UnknownUUIDError',
-                          status=httplib.BAD_REQUEST),
+                          status=http.client.BAD_REQUEST),
             ExceptionInfo(code=204, exc_type='VersionMismatchError'),
             ExceptionInfo(code=205, exc_type='AMQPError',
-                          status=httplib.REQUEST_TIMEOUT),
+                          status=http.client.REQUEST_TIMEOUT),
             ExceptionInfo(code=206, exc_type='MissingParameterError',
-                          status=httplib.BAD_REQUEST),
+                          status=http.client.BAD_REQUEST),
             ExceptionInfo(code=207, exc_type='DocumentUrlNotValidException',
-                          status=httplib.BAD_REQUEST),
+                          status=http.client.BAD_REQUEST),
 
             # -----------------------------------------------------------------
             # 3xx exception codes are reserved for Service package
@@ -102,7 +104,7 @@ class VestaExceptions(object):
             # A message must absolutely be set here because specific message
             # contains sensible data
             ExceptionInfo(code=506, exc_type='SwiftException',
-                          msg=u'Cannot renew the swift token'),
+                          msg='Cannot renew the swift token'),
 
             # -----------------------------------------------------------------
             # 600 and above exceptions codes are free to be used by workers
@@ -116,7 +118,7 @@ class VestaExceptions(object):
             ExceptionInfo(code=631, exc_type="WavFormatInvalid"),
             ExceptionInfo(code=632, exc_type="WavHeaderInvalid"),
             ExceptionInfo(code=633, exc_type="SubprocessProblem",
-                          msg=u"Diarisation worker internal problem"),
+                          msg="Diarisation worker internal problem"),
 
             # 640 onwards taken by STT.
             ExceptionInfo(code=640, exc_type="PathInvalidError"),

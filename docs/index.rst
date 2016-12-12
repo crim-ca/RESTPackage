@@ -53,7 +53,7 @@ Package level
    :maxdepth: 2
    :glob:
 
-   src/Service/*
+   ../../Service/docs/src/*
 
 
 Indices and tables

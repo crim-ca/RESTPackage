@@ -29,7 +29,7 @@ def generate_token(signature_key, audience, algorithm, duration):
     token = {'aud': audience,
              'exp': datetime.utcnow() + delta}
     signed_token = jwt.encode(token, decoded_signature, algorithm=algorithm)
-    logger.info(u"Generated JWT")
+    logger.info("Generated JWT")
     return signed_token
 
 
@@ -47,7 +47,7 @@ def validate_token(signed_token, signature_key, audience):
                        decoded_signature,
                        audience=audience,
                        leeway=10)
-    logger.info(u"Successfully validated JWT : {0}".format(claim))
+    logger.info("Successfully validated JWT : %s", claim)
 
 
 def main():
@@ -76,7 +76,7 @@ def main():
                            audience,
                            algorithm,
                            duration=options.token_duration)
-    print token
+    print(token)
 
 if __name__ == '__main__':
     main()

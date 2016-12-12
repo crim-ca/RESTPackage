@@ -92,11 +92,11 @@ def handle_exceptions(exception_instance):
     :param exception_instance: Exception instance.
     """
     logger = logging.getLogger(__name__)
-    logger.debug(u"Generating error response for the exception {e}".
-                 format(e=repr(exception_instance)))
+    logger.debug("Generating error response for the exception %s",
+                 repr(exception_instance))
     logger.exception(exception_instance)
     if APP.debug:
-        logger.info(u"In debug mode, re-raising exception")
+        logger.info("In debug mode, re-raising exception")
         raise
     return make_error_response(html_status=exception_instance.status_code,
                                html_status_response=exception_instance.message,
@@ -172,11 +172,11 @@ def info(service_route='.'):
 
     # Get information on registered workers ---------------------
     queue_name = worker_config['celery_queue_name']
-    logger.info(u"Refreshing knowledge on all worker queues")
+    logger.info("Refreshing knowledge on all worker queues")
     inspector = CELERY_APP.control.inspect()
     active_queues = inspector.active_queues()
-    logger.debug(u"Worker info : {w}".format(w=active_queues))
-    logger.debug(u"Queue info : {q}".format(q=queue_name))
+    logger.debug("Worker info : %s", active_queues)
+    logger.debug("Queue info : %s", queue_name)
 
     active_workers = 0
 
@@ -186,7 +186,7 @@ def info(service_route='.'):
                 if queue_name in _q_['name']:
                     active_workers += 1
 
-    logger.info(u"There are {n} known workers found".format(n=active_workers))
+    logger.info("There are %s known workers found", active_workers)
     service_info.append(('activeWorkers', active_workers))
 
     service_info = collections.OrderedDict(service_info)
@@ -206,7 +206,7 @@ def stats(service_route='.'):
     doesn't have to contain a route token
     """
     logger = logging.getLogger(__name__)
-    logger.info(u"Requested stats for service {s}".format(s=service_route))
+    logger.info("Requested stats for service %s", service_route)
     # JSON is used by default but the Canarie API requires html as default
     set_html_as_default_response()
 
@@ -260,13 +260,13 @@ def configure_home_route():
     /info, /doc, etc.
     """
     logger = logging.getLogger(__name__)
-    logger.debug(u"Current configuration is : {0}".format(APP.config))
-    logger.debug("Root path is {0}".format(APP.root_path))
-    logger.info("Static path is {0}".format(APP.static_folder))
+    logger.debug("Current configuration is : %s", APP.config)
+    logger.debug("Root path is %s", APP.root_path)
+    logger.info("Static path is %s", APP.static_folder)
 
-    known_services_routes = APP.config['WORKER_SERVICES'].keys()
-    logger.info(u"Configuring home route for services {s}".
-                format(s=known_services_routes))
+    known_services_routes = list(APP.config['WORKER_SERVICES'].keys())
+    logger.info("Configuring home route for services %s",
+                known_services_routes)
 
     routes = [r for r in known_services_routes if r != '.']
 
@@ -286,7 +286,7 @@ def close_connection(dummy_exception):
     :param dummy_exception: Exception handled elsewhere, nothing to do with it
     """
     logger = logging.getLogger(__name__)
-    logger.info(u"Disconnecting from requests stats database")
+    logger.info("Disconnecting from requests stats database")
     requests_database = getattr(g, '_Requests_database', None)
     if requests_database is not None:
         requests_database.close()

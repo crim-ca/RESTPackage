@@ -26,7 +26,9 @@ REQUIREMENTS = [
     "PyJWT==0.4.3",
     "python-novaclient",
     "dicttoxml==1.6.6",
-    "VestaService==0.2.0"
+    "VestaService==0.2.0",
+    "configparser",
+    "future"
 ]
 
 TEST_REQUIREMENTS = [
@@ -52,7 +54,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
     ],
 
     # -- Package structure -------------------------------------------------
@@ -60,11 +62,17 @@ setup(
         'VestaRestPackage'
     ],
     package_dir={'VestaRestPackage': 'VestaRestPackage'},
-    include_package_data=True,
+    package_data={'VestaRestPackage': ['static/*', 'templates/*']},
+
     install_requires=REQUIREMENTS,
     zip_safe=False,
 
     # -- self - tests --------------------------------------------------------
     test_suite='tests',
-    tests_require=TEST_REQUIREMENTS
+    tests_require=TEST_REQUIREMENTS,
+
+    entry_points={
+        'console_scripts':
+            ['vrp_default_config='
+             'VestaRestPackage.print_example_configuration:main']}
 )

@@ -26,7 +26,7 @@ def configure(config):
     logger = logging.getLogger(__name__)
 
     proj_name = config['CELERY_PROJ_NAME']
-    logger.debug("Celery project name is {0}".format(proj_name))
+    logger.debug("Celery project name is %s", proj_name)
     celery_app = Celery(proj_name)
     celery_app.config_from_object(config['CELERY'])
 
@@ -34,15 +34,15 @@ def configure(config):
 
     workers = config['WORKER_SERVICES']
 
-    logger.info(u"Configuring Celery task names from routes for services: {s}"
-                .format(s=workers.keys()))
-    for w_config in workers.values():
+    logger.info("Configuring Celery task names from routes for services: %s",
+                workers.keys())
+    for w_config in list(workers.values()):
         service_name = w_config['celery_task_name']
         celery_task = '{n}.{t}'.format(n=proj_name, t=service_name)
         queue_name = {'queue': w_config["celery_queue_name"]}
         celery_routes[celery_task] = queue_name
 
-    logger.info(u"Configured Celery routes are: {0}".format(celery_routes))
+    logger.info("Configured Celery routes are: %s", celery_routes)
 
     celery_app.conf.update(CELERY_ROUTES=celery_routes)
     return celery_app
