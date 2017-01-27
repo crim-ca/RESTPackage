@@ -24,7 +24,8 @@ DATABASES = {
         'filename': "requests.db",
         'schema_filename': "../static/requests_schema.sql"}}
 
-CELERY_PROJ_NAME = "worker"
+CELERY_PROJ_NAME = "ServiceGateway"
+
 CELERY = {
     'BROKER_URL': "amqp://localhost//",
     'CELERY_RESULT_BACKEND': "amqp://",
@@ -66,14 +67,14 @@ POST_ANNOTATIONS_REQ_URL = ("http://localhost:5001/"
 #     'route_keyword': 'my_service',
 #
 #     # The celery task name.
-#     # Must match the task in the worker APP name : <proj_name>.<task_name>
-#     # (ex.: worker.my_service)
-#     'celery_task_name': 'my_service',
+#     # Must match the task in the worker APP name.
+#     # (ex.: my_package.my_service)
+#     'celery_task_name': 'my_package.my_service',
 #
 #     # The celery queue name.
 #     # Must match the queue name specified when starting the worker
 #     # (by the -Q switch)
-#     'celery_queue_name': 'my_service_0.1.0',
+#     'celery_queue_name': 'my_service',
 #
 #     # Following parameters are required by the CANARIE API (info request)
 #     'name': 'My service',
@@ -144,7 +145,9 @@ FLOWER_API_URL = "http://localhost:5555/api"
 
 MSS = {
     'SWIFT': {
-        # shh certificate to connect to remote computer if SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
+        # shh certificate to connect to remote computer if
+        # SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
+        #
         'certificate_filename': 'dir/to/the/certificate.pem',
         # remote computer address if SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
         'token_server': 'localhost',
@@ -164,9 +167,12 @@ MSS = {
 
     # Temp URL validity (One day)
     'TEMP_URL_DEFAULT_VALIDITY': 86400,
-    # Describes the API used to access swift. The options are V1_LOCAL for Docker local swift, V2 for standard V2 api, and V2_REMOTE when a remote ssh host is used to get swift credentials.
+    # Describes the API used to access swift. The options are V1_LOCAL for
+    # Docker local swift, V2 for standard V2 api, and V2_REMOTE when a remote
+    # ssh host is used to get swift credentials.
     'SWIFT_AUTHENTIFICATION_OPTIONS': 'V1_LOCAL',
     'SWIFT_REDIRECT_URL': 'http://localhost:8080',
-    # Part of the auth url to ignore when returning a swift access url for the client.
+    # Part of the auth url to ignore when returning a swift access url for the
+    # client.
     'STORAGE_URL_IGNORE_PREFIX_FOR_TEMP_URL': 'swift'
     }

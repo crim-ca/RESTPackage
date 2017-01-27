@@ -38,9 +38,8 @@ def configure(config):
                 workers.keys())
     for w_config in list(workers.values()):
         service_name = w_config['celery_task_name']
-        celery_task = '{n}.{t}'.format(n=proj_name, t=service_name)
         queue_name = {'queue': w_config["celery_queue_name"]}
-        celery_routes[celery_task] = queue_name
+        celery_routes[service_name] = queue_name
 
     logger.info("Configured Celery routes are: %s", celery_routes)
 
