@@ -64,16 +64,16 @@ class VestaExceptions(object):
             ExceptionInfo(code=200, exc_type='SettingsException'),
             ExceptionInfo(code=201, exc_type='VersionException'),
             ExceptionInfo(code=202, exc_type='UnknownServiceError',
-                          status=http.client.BAD_REQUEST),
+                          status=httplib.BAD_REQUEST),
             ExceptionInfo(code=203, exc_type='UnknownUUIDError',
-                          status=http.client.BAD_REQUEST),
+                          status=httplib.BAD_REQUEST),
             ExceptionInfo(code=204, exc_type='VersionMismatchError'),
             ExceptionInfo(code=205, exc_type='AMQPError',
-                          status=http.client.REQUEST_TIMEOUT),
+                          status=httplib.REQUEST_TIMEOUT),
             ExceptionInfo(code=206, exc_type='MissingParameterError',
-                          status=http.client.BAD_REQUEST),
+                          status=httplib.BAD_REQUEST),
             ExceptionInfo(code=207, exc_type='DocumentUrlNotValidException',
-                          status=http.client.BAD_REQUEST),
+                          status=httplib.BAD_REQUEST),
 
             # -----------------------------------------------------------------
             # 3xx exception codes are reserved for Service package
