@@ -91,6 +91,12 @@ class VRPTestCase(TestCase):
         os.close(self.db_fd)
         os.unlink(APP.config['DATABASE'])
 
+    def test_db_files(self):
+        db_fn = APP.config['DATABASES']['Invocations']['schema_filename']
+        self.assertTrue(os.path.exists(db_fn))
+        db_fn = APP.config['DATABASES']['Requests']['schema_filename']
+        self.assertTrue(os.path.exists(db_fn))
+
     def test_stats(self):
         # Inject header so we can request JSON
         headers = {'Content-Type': "application/json"}
