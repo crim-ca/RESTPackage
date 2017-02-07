@@ -39,3 +39,11 @@ Celery-compatible configuration object for values extracted from the
 application configuration file. This can be helpful if one wants to define
 values for the application yet reuse those same directives for Celery compliant
 modules (e.g.: flower).
+
+.. _default_config_values:
+
+Default configuration file contents
+===================================
+
+.. literalinclude:: ../VestaRestPackage/default_configuration.py
+   :language: python

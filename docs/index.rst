@@ -26,6 +26,7 @@ Package information
    authors
    license
    provenance
+   source
    release_notes
 
 
