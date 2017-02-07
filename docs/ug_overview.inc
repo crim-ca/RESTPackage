@@ -18,7 +18,7 @@ Worker Services Features
 
 - A worker receives his task directives from the REST Gateway through
   Celery/AMQP
-  
+
   - Can add arbitrary arguments
 
 - Resulting messages are temporarily stored on AMQP
@@ -34,7 +34,7 @@ API specifications
 ++++++++++++++++++
 
 The API of this service was constructed in a way to respect the requirements of
-the :ref:`canarie_api` specification for online services.
+the :ref:`canarie_api_methods` specification for online services.
 
 
 Calling Patterns
