@@ -98,9 +98,19 @@ def handle_exceptions(exception_instance):
     if APP.debug:
         logger.info("In debug mode, re-raising exception")
         raise
-    return make_error_response(html_status=exception_instance.status_code,
-                               html_status_response=exception_instance.message,
-                               vesta_exception=exception_instance)
+
+    status_code = None
+    try:
+        status_code = exception_instance.status_code
+    except AttributeError:
+        logger.info("Processing exception which has no attribute "
+                    "«status_code»")
+    logger.debug("Status code is %s", status_code)
+    response = make_error_response(
+        html_status=status_code,
+        html_status_response=exception_instance.message,
+        vesta_exception=exception_instance)
+    return response
 
 # -- Flask routes ------------------------------------------------------------
 APP.url_map.converters['any_int'] = AnyIntConverter
@@ -175,6 +185,7 @@ def info(service_route='.'):
     logger.info("Refreshing knowledge on all worker queues")
     inspector = CELERY_APP.control.inspect()
     active_queues = inspector.active_queues()
+
     logger.debug("Worker info : %s", active_queues)
     logger.debug("Queue info : %s", queue_name)
 

@@ -132,7 +132,7 @@ def validate_uuid(uuid, service_name):
     logger = logging.getLogger(__name__)
     query = 'select count(*) from requests where service = ? and uuid = ?'
 
-    logger.debug("Accessing information for request «%s» to %s",
+    logger.debug("Accessing information for request %s to %s",
                  uuid, service_name)
 
     database = get_requests_db()
@@ -164,12 +164,14 @@ def validate_state(uuid, service_name, state):
     select_query = ('select activity from requests where '
                     'service = ? and uuid = ?')
     logger.debug("Verifying the activity flag in DB "
-                 "for request «%s» to %s", uuid, service_name)
+                 "for request %s to %s", uuid, service_name)
 
     database = get_requests_db()
     cur = database.execute(select_query, [service_name, uuid])
     rows = cur.fetchall()
     activity_flag = rows[0][0]
+    logger.debug("Activity flag is: %s", activity_flag)
+    logger.debug("State is: %s", state)
     cur.close()
 
     if state['status'] == 'PENDING':

@@ -24,7 +24,7 @@ DATABASES = {
         'filename': "requests.db",
         'schema_filename': "../static/requests_schema.sql"}}
 
-CELERY_PROJ_NAME = "ServiceGateway"
+CELERY_PROJ_NAME = "worker"
 
 CELERY = {
     'BROKER_URL': "amqp://localhost//",
