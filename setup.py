@@ -26,7 +26,7 @@ REQUIREMENTS = [
     "PyJWT==0.4.3",
     "python-novaclient",
     "dicttoxml==1.6.6",
-    "VestaService==0.2.0",
+    "VestaService==0.2.2",
     "configparser",
     "future"
 ]

@@ -191,7 +191,7 @@ def validate_state(uuid, service_name, state):
                         'service = ? and uuid = ?')
 
         logger.debug("Turning on the activity flag in db "
-                     "of task «%s» for %s", uuid, service_name)
+                     "of task %s for %s", uuid, service_name)
 
         cur = database.execute(update_query, [True, service_name, uuid])
         cur.close()
@@ -236,11 +236,15 @@ def store_uuid(uuid, service_name):
 def async_fct_wrapper(out_dict, fct, *args, **kwargs):
     logger = logging.getLogger(__name__)
     try:
+        logger.debug("fct : %s", fct)
         logger.debug("args : %s", args)
         logger.debug("kwargs : %s", kwargs)
         out_dict['return_value'] = fct(*args, **kwargs)
         logger.debug("out_dict : %s", out_dict)
     except:
+        logger.exception("Threaded calling of Celery hit exception which "
+                         "follows:",
+                         exc_info=True)
         out_dict['exception'] = sys.exc_info()
 
 
@@ -402,6 +406,7 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
     params['url'] = doc_url
     params['name'] = celery_task_name
     params['app'] = CELERY_APP
+    params['queue'] = worker_config['celery_queue_name']
     params['misc'].update(other_args)
     logger.debug("Final param structure : %s", params)
     async_result = async_call(send_task_request, **params)

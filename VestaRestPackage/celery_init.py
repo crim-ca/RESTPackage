@@ -16,7 +16,8 @@ from celery import Celery
 
 def configure(config):
     """
-    Configures the celery routes based on the REST routes.
+    Configures the celery application.
+
     A given service name will have its requests route through a queue named
     like the REST route.
 
@@ -29,19 +30,4 @@ def configure(config):
     logger.debug("Celery project name is %s", proj_name)
     celery_app = Celery(proj_name)
     celery_app.config_from_object(config['CELERY'])
-
-    celery_routes = dict()
-
-    workers = config['WORKER_SERVICES']
-
-    logger.info("Configuring Celery task names from routes for services: %s",
-                workers.keys())
-    for w_config in list(workers.values()):
-        service_name = w_config['celery_task_name']
-        queue_name = {'queue': w_config["celery_queue_name"]}
-        celery_routes[service_name] = queue_name
-
-    logger.info("Configured Celery routes are: %s", celery_routes)
-
-    celery_app.conf.update(CELERY_ROUTES=celery_routes)
     return celery_app
