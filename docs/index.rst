@@ -1,5 +1,5 @@
-REST API package documentation
-==============================
+Vesta REST API package documentation
+====================================
 
 .. include:: ../README.rst
 
@@ -7,7 +7,7 @@ REST API package documentation
 User Guide
 ----------
 
-Describes the typical usage of the REST API functions.
+Describes the typical usage of the Vesta REST API functions.
 
 .. toctree::
    :maxdepth: 3
@@ -22,9 +22,11 @@ Package information
    :maxdepth: 2
 
    install
+   configuration
    authors
    license
    provenance
+   source
    release_notes
 
 
@@ -33,7 +35,7 @@ Source code documentation:
 
 This section documents the actual code modules for anyone interested in
 interfacing with the code base. For example if someone would like to create a
-new type of service gateway this information might be helpful. 
+new type of service gateway this information might be helpful.
 
 
 Package level
@@ -44,16 +46,6 @@ Package level
    :glob:
 
    src/*
-   
-
-«Service» sub-package level
-+++++++++++++++++++++++++++
-
-.. toctree::
-   :maxdepth: 2
-   :glob:
-
-   ../../Service/docs/src/*
 
 
 Indices and tables

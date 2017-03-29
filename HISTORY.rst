@@ -1,15 +1,20 @@
 Release notes
 =============
 
-1.7.3
+1.7.4
 -----
 
 * AMQP routes are explicitly specified when submitting tasks so that we can have a same task name on diffrent queues.
 
+1.7.3
+-----
+
+* Work-around for PyPi package listing restriction. Functionnaly equivalent.
+
 1.7.2
 -----
 
-* Work-around for PyPi package listing restriction.
+* DB schema is now part of distributed package.
 
 1.7.1
 -----

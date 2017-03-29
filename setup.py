@@ -62,7 +62,9 @@ setup(
         'VestaRestPackage'
     ],
     package_dir={'VestaRestPackage': 'VestaRestPackage'},
-    package_data={'VestaRestPackage': ['static/*', 'templates/*']},
+    package_data={'VestaRestPackage': ['static/*',
+                                       'templates/*',
+                                       'db_struct/*']},
 
     install_requires=REQUIREMENTS,
     zip_safe=False,

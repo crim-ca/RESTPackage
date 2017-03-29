@@ -10,8 +10,12 @@ To have the programs in the package override the values with the values
 found in this file, you need to set the environment variable named
 "VRP_CONFIGURATION" to the path of your own copy before launching the program.
 
-See also :py:mod:`~.VestaRestPackage.print_example_configuration`.
+See also :py:mod:`VestaRestPackage.print_example_configuration`.
 """
+
+from os.path import dirname, join
+__THIS_DIR__ = dirname(__file__)
+
 
 MY_SERVER_NAME = "localhost"
 
@@ -19,10 +23,12 @@ MY_SERVER_NAME = "localhost"
 DATABASES = {
     'Invocations': {
         'filename': "service_invocations.db",
-        'schema_filename': "../static/service_invocations_schema.sql"},
+        'schema_filename':
+            join(__THIS_DIR__, "db_struct/service_invocations_schema.sql")},
     'Requests': {
         'filename': "requests.db",
-        'schema_filename': "../static/requests_schema.sql"}}
+        'schema_filename':
+            join(__THIS_DIR__, "db_struct/requests_schema.sql")}}
 
 CELERY_PROJ_NAME = "worker"
 
@@ -147,7 +153,7 @@ MSS = {
     'SWIFT': {
         # shh certificate to connect to remote computer if
         # SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
-        #
+
         'certificate_filename': 'dir/to/the/certificate.pem',
         # remote computer address if SWIFT_AUTHENTIFICATION_OPTIONS = V2_REMOTE
         'token_server': 'localhost',

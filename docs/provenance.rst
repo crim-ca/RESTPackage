@@ -1,7 +1,7 @@
 Provenance
 ==========
 
-Who authorizes releases: Tom Landry (CRIM, project lead).
+Who authorizes releases: Frederic Osterrath (CRIM, project lead).
 
 Release validation procedure
 ----------------------------
