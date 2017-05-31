@@ -271,7 +271,7 @@ def async_call(fct, *args, **kwargs):
 
     if out_dict['exception'] is not None:
         exc = out_dict['exception']
-        raise exc[0](exc[1]).with_traceback(exc[2])
+        raise exc[0], exc[1], exc[2]
 
     return out_dict['return_value']
 
