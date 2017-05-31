@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.7.5
+-----
+
+* Bug fix for error handling.
+
 1.7.4
 -----
 
