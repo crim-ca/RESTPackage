@@ -309,6 +309,8 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
     service_name = validate_service_route(service_route)
     params = extra_params
     logger.debug("Extra params are : %s", params)
+    no_params_needed = params.get('no_params_needed', False)
+    logger.debug("no_params_needed is set to %s", no_params_needed)
 
     if service_route == '.':
         friendly_task_name = task_name
@@ -316,14 +318,17 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
         friendly_task_name = '{0} by {1}'.format(task_name, service_name)
 
     if storage_doc_id is None:
-        # If storage_doc_id is None a full doc_url must be given
-        if 'doc_url' not in request.values:
-            raise MissingParameterError('POST',
-                                        '/{0}'.format(task_name),
-                                        'doc_url')
+        doc_url = None
+        if not no_params_needed:
+            # If storage_doc_id is None a full doc_url must be given
+            if 'doc_url' not in request.values:
+                raise MissingParameterError('POST',
+                                            '/{0}'.format(task_name),
+                                            'doc_url')
 
-        # request.values combines values from arguments and form
-        doc_url = request.values['doc_url']
+            else:
+                # request.values combines values from arguments and form
+                doc_url = request.values['doc_url']
 
         logger.info('Submitting "%s" task with public url : %s',
                     friendly_task_name, doc_url)
@@ -334,7 +339,8 @@ def submit_task(storage_doc_id, task_name, service_route='.', **extra_params):
         logger.info('Submitting "%s" task with storage doc id : %s',
                     friendly_task_name, storage_doc_id)
 
-    validate_url(doc_url)
+    if no_params_needed is False:
+        validate_url(doc_url)
 
     # For all storage_*_id given in request.values, resolve them if necessary
     # and add them to the misc data holder to async_call
