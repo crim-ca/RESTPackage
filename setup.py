@@ -24,7 +24,6 @@ REQUIREMENTS = [
     "Flask==0.10.1",
     "pyrabbit==1.0.1",
     "PyJWT==0.4.3",
-    "python-novaclient",
     "dicttoxml==1.6.6",
     "VestaService==0.2.2",
     "configparser",
