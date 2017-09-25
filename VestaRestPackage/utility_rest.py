@@ -507,6 +507,7 @@ def make_error_response(html_status=None,
     """
     logger = logging.getLogger(__name__)
     vesta_exc_instance = VestaExceptions.Instance()
+    logger.debug("html_status_response is passed as %s", html_status_response)
 
     # Extract the real exception from a WorkerExceptionWrapper if required
     is_worker_exc = False
@@ -527,10 +528,12 @@ def make_error_response(html_status=None,
 
     # If the status response is None use the one provide by httplib
     if html_status_response is None:
+        logger.debug("Getting error response from httplib")
         html_status_response = httplib.responses[html_status]
     # Else, check if html_status_response already contains the HTML status code
     else:
-        match = re.search("^([0-9]*):? *(.*)$", html_status_response)
+        logger.debug("html_status_response is %s", html_status_response)
+        match = re.search("^([0-9]*):? *(.*)$", repr(html_status_response))
         if match and match.group(1) == str(html_status):
             # In which case it is removed from the response
             html_status_response = match.group(2)
@@ -621,12 +624,13 @@ def make_error_response(html_status=None,
         else:
             response = {
                 'status': html_status,
-                'description': html_status_response,
+                'description': repr(html_status_response),
                 'vesta': {
                     'code': vesta_exception_code,
                     'message': vesta_exc_message
                 }
             }
+            logger.debug("response is %s", response)
             return jsonify(response), html_status
     else:
         # Escapes message properly for HTML
