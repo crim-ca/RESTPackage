@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.7.6
+-----
+
+* Add configuration to service which permits use without any arguments.
+
 1.7.5
 -----
 
