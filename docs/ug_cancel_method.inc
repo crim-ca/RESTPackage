@@ -1,7 +1,7 @@
 .. _cancel_method:
 
 cancel
-++++++
+~~~~~~
 
 To cancel a given processing request
 
