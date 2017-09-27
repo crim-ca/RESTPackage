@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.7.7
+-----
+
+* Handle error cases for JSON submittal with arguments.
+
 1.7.6
 -----
 
