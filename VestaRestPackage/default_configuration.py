@@ -119,7 +119,7 @@ POST_ANNOTATIONS_REQ_URL = ("http://localhost:5001/"
 #
 #     # Specify if the service should work without any parameters supplied.
 #     'noparams': False,
-#      
+#
 #     'os_args': {'image': 'my_service_image_name_v_0.1.0',
 #                 'instance_type': 'm1.large'},
 #     # Process-request to spawn VM ratio

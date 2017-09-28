@@ -239,8 +239,9 @@ def async_fct_wrapper(out_dict, fct, *args, **kwargs):
         logger.debug("fct : %s", fct)
         logger.debug("args : %s", args)
         logger.debug("kwargs : %s", kwargs)
-        logger.debug("Removing argument no_params_needed")
-        kwargs.pop("no_params_needed")
+        if "no_params_needed" in kwargs:
+            logger.debug("Removing argument no_params_needed")
+            kwargs.pop("no_params_needed")
         out_dict['return_value'] = fct(*args, **kwargs)
         logger.debug("out_dict : %s", out_dict)
     except:

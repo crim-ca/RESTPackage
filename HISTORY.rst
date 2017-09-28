@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.7.8
+-----
+
+* Configuration directive no_params_needed is now optionnal.
+
 1.7.7
 -----
 
