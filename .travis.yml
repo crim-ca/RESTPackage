@@ -1,22 +1,21 @@
 language: python
-
 python: 2.7
 env:
+  matrix:
   - TOXENV=py27
-
+  global:
+    secure: MLEL+S74y9XBcNGuHN5PODNKTGRISRCQURO7j0t+sPaRTSQEjts3DdGaDRMpVlIIvSmWuJMuRwXQXRMLkJ2FmmFF1BLxGk9aVQwXtsp2F58Gqb7wcIJx9mf1AuXVocCvGB6jm/aHHl7c/lMtA6P/aqjcLqTMHW6a35PQYqk5A2jhj1F7ouo1BT93MZ7NO8ggZwebz5jemjhRqG9EpqUtuKOS6ocxmWVzp+dp/0GZ9M9L0XpcjiNv13cDpeSfLaBK5xnEk9ZGHZAid6dMWWS2LeAwxNAYqpPHuOr8WaCIdELxfJZzWbgYSTSLQ7wqBtDq1MLdoaO1FhHxAaFK6o5LnV6wxVcKKpM+oId/Dt0eVqFmykT9mCiWoEIdmuk9u4iwK3823OiCdXFcFrQI6J27vmL4YzVqRAEFhuuIe9hrxOoi0/x4Pshyq5bpD3c24nFLt5BIsCzrFXFBERBTn1BAHN6JT2yYm35IMASsXvtmxhuMWXb+PGUgW80gy09ozmWWxQJj+edIpwr0Zj7evb4S7TBS1lE4rlsQTlLCeRs1TOQhZK0yq9kBfiHF4z+ufPahmOAfqWNTLCvaRNCVDXix6zLH09Vy3m/y/wTHQvZ4TqcfChh8UhiV+DN0hMrvELXhDvpHJMlUvYemc+20Ei2kHW6qMMAoQl1oJZsB1h0S8qY=
 install:
-  - pip install -U tox
-
+- pip install -U tox
 script:
-  - tox
-
-# deploy:
-#   provider: pypi
-#   distributions: sdist
-#   user: www-crim-ca-devs
-#   password:
-#     secure: PLEASE_REPLACE_ME
-#   on:
-#     tags: true
-#     repo: audreyr/python_boilerplate
-#     condition: $TOXENV == py27
+- tox
+notifications:
+  slack: crim-ca:A7jqt2VJWnPwN6A3AZXJ40gt
+deploy:
+  provider: pypi
+  distributions: bdist_wheel
+  user: crim-ca
+  password:
+    secure: iVmAqp2rLMd7yaWMismfecm5oz9WQ4G2xqB+DDOkY5wgxU/tmaeWrp2SwZhf5f8gWDX9hFoRekctkq6bANfSY5zCjmkzxJSHg7Uzt8x0vOCXenQo1+EujFJRnfSp9Hyl47jQaWU0/2N4F4I/lXxeojKhwGgyuaiyiQtqthfrH7UF+BFjltIctcLODolk/O0SJQMImnMkt8L7PR2Jcfkr8gaa+yw6AIuNN5QOQR9yksOByAsFziQoMg4UVenKGyamiEYzNbVNUsiWA7h+Ivc7KhC3dvKgpwS/eo/tX4JbxfN/fF9R5hJBT7yZRA/dSztaCxV6M3+0dnpj9GHWVRdDH6CgUzAzUrpVxLbKfHLOyN+wC3uwWsqCrlUkE+a7m8kb6wGjWc7Z47AQiYvrnNvwGGYc+Vm+Atcgc1EWmYvYkeLyTVibWIFP/PZInETEyj7l0fB7cbZ+QMyMk8vekrd5IBhvrF/GaEV9m1jONa54ubbQB+oMolk8uM6taVx4qGZgeKLpWa+hMo/jWz/TG9Ka4vG7C4cgC/y1DJX1G2jZVazKBjbJiBFm2HDFnWLcBN36Y3w/zdb6wqk9wmwCpX+7t0/aAhDWpi64hWtLMstaE9n6XJUvq/SpfJxzeR+Po1ylmzlFsriBRKaLEhxyjB2Efn9Lpuyu8SBLsH9331H6As0=
+  on:
+    tags: true
