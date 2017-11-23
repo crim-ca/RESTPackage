@@ -12,8 +12,7 @@ import argparse
 
 from conf import API_VERSION as VERSION
 
-DOC_DESTINATION = ("centos@services.vesta.crim.ca:"
-                   "/usr/share/nginx/html/docs/vrp/")
+DOC_DESTINATION = None
 
 
 def norm_perms():

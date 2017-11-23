@@ -270,7 +270,7 @@ intersphinx_mapping = {'celery':
                        ('http://docs.celeryproject.org/en/latest/',
                         None),
                        'jass':
-                       ('http://services.vesta.crim.ca/docs/jass/latest/',
+                       ('http://vesta.crim.ca/docs/jass/latest/',
                         None)}
 
 suppress_warnings = ['image.nonlocal_uri']
