@@ -548,7 +548,7 @@ def make_error_response(html_status=None,
     if generic_vesta_exc_message is not None:
         vesta_exc_message = generic_vesta_exc_message
     elif real_exception:
-        vesta_exc_message = str(real_exception)
+        vesta_exc_message = repr(real_exception)
     else:
         vesta_exc_message = ''
 
@@ -595,7 +595,7 @@ def make_error_response(html_status=None,
         logger.info('The following exception has been raised : '
                     '%s : %s',
                     type(real_exception).__name__,
-                    str(real_exception))
+                    repr(real_exception))
     else:
         vesta_exc_log_msg = ''
 
