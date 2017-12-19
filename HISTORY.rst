@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.7.9
+-----
+
+* Fix handling of exceptions with messages encoded in utf-8.
+
 1.7.8
 -----
 
