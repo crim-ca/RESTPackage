@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.8.0
+-----
+
+* Adding a command line tool to call a service in a blocking mode
+
 1.7.9
 -----
 

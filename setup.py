@@ -75,5 +75,7 @@ setup(
     entry_points={
         'console_scripts':
             ['vrp_default_config='
-             'VestaRestPackage.print_example_configuration:main']}
+             'VestaRestPackage.print_example_configuration:main',
+             'run_service=VestaRestPackage.run_process:main']
+    }
 )
