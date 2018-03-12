@@ -3,3 +3,5 @@
 VestaRestPackage.egg-info/*
 *.db
 .idea/
+*.whl
+dist/

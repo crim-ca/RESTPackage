@@ -49,6 +49,7 @@ def get_header():
         header = {"content-type": 'application/json'}
     return header
 
+
 # -- Annotator ---------------------------------------------------------------
 def annotate_url(service_name, url, params):
     """
@@ -185,6 +186,9 @@ def get_result(worker_name, uuid, timeout=None, sg_url=SG_URL):
     Wait for processing results and return RAW data structure.
 
     :param timeout: How many seconds to wait for a result.
+    :param worker_name: name of the worker
+    :param uuid: UUID of the task
+    :param sg_url: URL of the service gateway
     """
     logger = getLogger(__name__)
     status = None
@@ -244,6 +248,9 @@ def main():
     parser.add_argument("--json",
                         help="Path to a file containing the parameters to "
                              "submit to the service as body contents.")
+    parser.add_argument("--json_string",
+                        help="String containing the parameters to "
+                             "submit to the service as body contents.")
     parser.add_argument("--sg_url",
                         help="HTTP URL base path for the SG",
                         default=SG_URL)
@@ -263,6 +270,8 @@ def main():
     if args.json:
         with open(args.json, "rt") as params_file:
             json_contents = json.load(params_file)
+    elif args.json_string:
+        json_contents = json.loads(args.json_string)
     else:
         json_contents = None
     if args.params:

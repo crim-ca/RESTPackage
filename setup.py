@@ -25,7 +25,7 @@ REQUIREMENTS = [
     "pyrabbit==1.0.1",
     "PyJWT==0.4.3",
     "dicttoxml==1.6.6",
-    "VestaService==0.3.2",
+    "VestaService==0.3.3",
     "configparser",
     "future"
 ]
