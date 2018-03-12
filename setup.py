@@ -63,7 +63,8 @@ setup(
     package_dir={'VestaRestPackage': 'VestaRestPackage'},
     package_data={'VestaRestPackage': ['static/*',
                                        'templates/*',
-                                       'db_struct/*']},
+                                       'db_struct/*',
+                                       'logging.ini']},
 
     install_requires=REQUIREMENTS,
     zip_safe=False,
