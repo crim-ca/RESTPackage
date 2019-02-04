@@ -21,7 +21,7 @@ else:
     HISTORY = ""
 
 REQUIREMENTS = [
-    "Flask>=0.12.3",
+    "Flask==0.12.3",
     "pyrabbit==1.0.1",
     "PyJWT==0.4.3",
     "dicttoxml==1.6.6",
@@ -31,7 +31,8 @@ REQUIREMENTS = [
 ]
 
 TEST_REQUIREMENTS = [
-    'nose'
+    'nose',
+    'nose-exclude'
 ]
 
 setup(
