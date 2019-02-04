@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.8.2
+-----
+
+* update flask version and VestaService version
+
 1.8.0
 -----
 
