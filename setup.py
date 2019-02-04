@@ -21,11 +21,11 @@ else:
     HISTORY = ""
 
 REQUIREMENTS = [
-    "Flask==0.10.1",
+    "Flask>=0.12.3",
     "pyrabbit==1.0.1",
     "PyJWT==0.4.3",
     "dicttoxml==1.6.6",
-    "VestaService==0.3.3",
+    "VestaService==0.4.1",
     "configparser",
     "future"
 ]
