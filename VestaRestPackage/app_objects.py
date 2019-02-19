@@ -11,6 +11,13 @@ from flask import Flask
 
 from . import default_configuration
 from . import celery_init
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
+sentry_sdk.init(
+    integrations=[FlaskIntegration()]
+)
+
 
 APP = Flask(__name__)
 
