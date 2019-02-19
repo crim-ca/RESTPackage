@@ -19,7 +19,7 @@ __THIS_DIR__ = dirname(__file__)
 
 MY_SERVER_NAME = "localhost"
 
-MONGO_URI = "mongodb://localhost:27018/RESTPackage"
+MONGO_URI = "mongodb://localhost:27017/RESTPackage"
 MONGO_COLLECTIONS = {
     'Invocations': [[("service",1),('datetime',-1)]],
     'Requests': ['uuid']
