@@ -17,9 +17,11 @@ import configparser as ConfigParser
 from urllib.parse import urlparse
 import http.client as httplib
 from os import path, getcwd
+import datetime
+import json
+from bson import json_util
 import traceback
 import threading
-import sqlite3
 import logging
 import sys
 import re
@@ -34,7 +36,6 @@ from flask import redirect
 from flask import request
 from flask import jsonify
 from flask import Markup
-from flask import g
 
 # -- Project specific --------------------------------------------------------
 from VestaService.request_process_mesg import (WorkerExceptionWrapper,
@@ -49,6 +50,23 @@ from .vesta_exceptions import (DocumentUrlNotValidException,
                                VestaExceptions,
                                AMQPError)
 from .app_objects import APP, CELERY_APP
+from flask_pymongo import PyMongo
+
+# MongoDB database connection
+mongo = PyMongo(APP)
+
+
+def init_db():
+    """
+    Create index in the mongo database using configuration
+    """
+    logger = logging.getLogger(__name__)
+    for collection,indexes in APP.config['MONGO_COLLECTIONS'].iteritems():
+        for index in indexes:
+            logger.info("Adding index %s to collection %s", index, collection)
+            mongo.db[collection].create_index(index, background=True)
+
+init_db()
 
 
 def request_wants_json():
@@ -130,16 +148,12 @@ def validate_uuid(uuid, service_name):
              isn't owned by the given service.
     """
     logger = logging.getLogger(__name__)
-    query = 'select count(*) from requests where service = ? and uuid = ?'
 
     logger.debug("Accessing information for request %s to %s",
                  uuid, service_name)
 
-    database = get_requests_db()
-    cur = database.execute(query, [service_name, uuid])
-    rows = cur.fetchall()
-    cur.close()
-    if rows[0][0] == 0:
+    data = mongo.db.Requests.find_one({"uuid": uuid})
+    if not data or data['service'] != service_name :
         raise UnknownUUIDError(uuid)
 
 
@@ -161,18 +175,13 @@ def validate_state(uuid, service_name, state):
        version mismatch
     """
     logger = logging.getLogger(__name__)
-    select_query = ('select activity from requests where '
-                    'service = ? and uuid = ?')
     logger.debug("Verifying the activity flag in DB "
                  "for request %s to %s", uuid, service_name)
 
-    database = get_requests_db()
-    cur = database.execute(select_query, [service_name, uuid])
-    rows = cur.fetchall()
-    activity_flag = rows[0][0]
+    data = mongo.db.Requests.find_one({"uuid": uuid})
+    activity_flag = data['activity']
     logger.debug("Activity flag is: %s", activity_flag)
     logger.debug("State is: %s", state)
-    cur.close()
 
     if state['status'] == 'PENDING':
         # The task is pending: Check the activity flag, in case it is on,
@@ -187,15 +196,10 @@ def validate_state(uuid, service_name, state):
     elif not activity_flag:
         # The task is being executed: Ensure that the activity flag is on.
 
-        update_query = ('update requests set activity=? where '
-                        'service = ? and uuid = ?')
-
         logger.debug("Turning on the activity flag in db "
                      "of task %s for %s", uuid, service_name)
-
-        cur = database.execute(update_query, [True, service_name, uuid])
-        cur.close()
-        database.commit()
+        data['activity'] = True
+        mongo.db.Requests.find_one_and_update({"uuid":uuid},data)
 
     if state['status'] == 'PROGRESS':
         payload_ver = state['result']['worker_id_version']
@@ -223,14 +227,13 @@ def store_uuid(uuid, service_name):
     :type service_name: string
     """
     logger = logging.getLogger(__name__)
-    query = 'insert into requests values(CURRENT_TIMESTAMP, ?, ?, ?)'
-
     logger.debug("Keeping track of request «%s» for %s", uuid, service_name)
 
-    database = get_requests_db()
-    cur = database.execute(query, [service_name, uuid, False])
-    cur.close()
-    database.commit()
+    data = {"datetime": datetime.datetime.utcnow(),
+            "service": service_name,
+            "uuid": uuid,
+            "activity": False}
+    mongo.db.Requests.insert_one(data)
 
 
 def async_fct_wrapper(out_dict, fct, *args, **kwargs):
@@ -667,67 +670,6 @@ def make_error_response(html_status=None,
                                        doc_url=doc_url)
         return template, html_status
 
-
-# ---------------------------------------------------------------------------
-def get_requests_db():
-    return get_db('Requests')
-
-
-# ---------------------------------------------------------------------------
-def get_invocations_db():
-    return get_db('Invocations')
-
-
-# ---------------------------------------------------------------------------
-def get_db(name):
-    """
-    Get a connection to an existing database. If it does not exist, create a
-    connection to local sqlite3 file.
-
-    If the local sqlite3 file doesn't exist, initialize it using a schema.
-    """
-    logger = logging.getLogger(__name__)
-    database = getattr(g, '_{0}_database'.format(name), None)
-    if database is None:
-        d_fn = APP.config['DATABASES'][name]['filename']
-        database_fn = None
-        if path.isabs(d_fn):
-            logger.debug("Considering database fn as is/absolute")
-            database_fn = d_fn
-        else:
-            logger.debug("Prepending CWD to database filename")
-            database_fn = path.join(getcwd(), d_fn)
-
-        logger.debug("Using db filename : %s", database_fn)
-        if not path.exists(database_fn):
-            database = g._database = sqlite3.connect(database_fn)
-            init_db(database, name)
-        else:
-            database = g._database = sqlite3.connect(database_fn)
-
-    return database
-
-
-def init_db(database, name):
-    """
-    Initialize a database from a schema
-    """
-    logger = logging.getLogger(__name__)
-    logger.info("Initializing %s database", name)
-    with current_app.app_context():
-        dbs_fn = APP.config['DATABASES'][name]['schema_filename']
-        schema_fn = None
-        if path.isabs(dbs_fn):
-            schema_fn = dbs_fn
-        else:
-            schema_fn = path.join(APP.root_path, dbs_fn)
-
-        logger.debug("Using schema filename : %s", schema_fn)
-        with current_app.open_resource(schema_fn, mode='r') as schema_f:
-            database.cursor().executescript(schema_f.read())
-        database.commit()
-
-
 def log_request(service_name, url):
     """
     Log an invocation into the DB
@@ -736,14 +678,14 @@ def log_request(service_name, url):
     :param url: URL used to access API
     """
     logger = logging.getLogger(__name__)
-    query = 'insert into invocations values(CURRENT_TIMESTAMP, ?, ?, ?)'
+    data = {"datetime": datetime.datetime.utcnow(),
+            "service": service_name,
+            "client": request.remote_addr,
+            "request": url}
+    logger.info("Log into DB : %s", json. dumps(data,default=json_util.default))
 
-    logger.info("Log into DB : %s", query)
+    mongo.db.Invocations.insert_one(data)
 
-    database = get_invocations_db()
-    cur = database.execute(query, [service_name, request.remote_addr, url])
-    cur.close()
-    database.commit()
 
 
 class AnyIntConverter(BaseConverter):
