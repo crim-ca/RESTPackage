@@ -49,7 +49,7 @@ class VestaExceptions(object):
             # -----------------------------------------------------------------
             ExceptionInfo(code=100, exc_type='NoneType'),
             ExceptionInfo(code=101, exc_type='Exception'),
-            ExceptionInfo(code=102, exc_type='pymongo.errors'),
+            ExceptionInfo(code=102, exc_type='PyMongoError'),
             ExceptionInfo(code=103, exc_type='ConfigParser.Error'),
             ExceptionInfo(code=104, exc_type='TypeError'),
             ExceptionInfo(code=105, exc_type='ValueError'),

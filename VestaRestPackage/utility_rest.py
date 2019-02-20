@@ -198,8 +198,7 @@ def validate_state(uuid, service_name, state):
 
         logger.debug("Turning on the activity flag in db "
                      "of task %s for %s", uuid, service_name)
-        data['activity'] = True
-        mongo.db.Requests.find_one_and_update({"uuid":uuid},data)
+        mongo.db.Requests.find_one_and_update({"uuid":uuid},{"$set": {"activity": True}})
 
     if state['status'] == 'PROGRESS':
         payload_ver = state['result']['worker_id_version']
