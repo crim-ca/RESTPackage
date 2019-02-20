@@ -70,10 +70,10 @@ HANDLED_HTML_ERRORS_STR = ", ".join(map(str, HANDLED_HTML_ERRORS))
 # http://stackoverflow.com/questions/938429/scope-of-python-lambda-functions-
 # and-their-parameters/938493#938493
 for status_code in HANDLED_HTML_ERRORS:
-    APP.error_handler_spec[None][status_code] = \
+    APP.register_error_handler(status_code,
         lambda more_info, status_code_copy = status_code: \
         make_error_response(html_status=status_code_copy,
-                            html_status_response=str(more_info))
+                            html_status_response=str(more_info)))
 
 
 @APP.errorhandler(Exception)
