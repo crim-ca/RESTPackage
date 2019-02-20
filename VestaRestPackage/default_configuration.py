@@ -20,6 +20,9 @@ __THIS_DIR__ = dirname(__file__)
 MY_SERVER_NAME = "localhost"
 
 MONGO_URI = "mongodb://localhost:27017/RESTPackage"
+
+# Defines the list of indexes to be created in MongoDB
+# see http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.create_index
 MONGO_COLLECTIONS = {
     'Invocations': [[("service",1),('datetime',-1)]],
     'Requests': ['uuid']
