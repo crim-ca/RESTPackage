@@ -19,16 +19,15 @@ __THIS_DIR__ = dirname(__file__)
 
 MY_SERVER_NAME = "localhost"
 
-# Database name relative to the current application directory
-DATABASES = {
-    'Invocations': {
-        'filename': "service_invocations.db",
-        'schema_filename':
-            join(__THIS_DIR__, "db_struct/service_invocations_schema.sql")},
-    'Requests': {
-        'filename': "requests.db",
-        'schema_filename':
-            join(__THIS_DIR__, "db_struct/requests_schema.sql")}}
+MONGO_URI = "mongodb://localhost:27017/RESTPackage"
+
+# Defines the list of indexes to be created in MongoDB
+# see http://api.mongodb.com/python/current/api/pymongo/collection.html#pymongo.collection.Collection.create_index
+MONGO_COLLECTIONS = {
+    'Invocations': [[("service",1),('datetime',-1)]],
+    'Requests': ['uuid']
+}
+
 
 CELERY_PROJ_NAME = "worker"
 

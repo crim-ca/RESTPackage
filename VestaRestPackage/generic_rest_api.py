@@ -23,7 +23,6 @@ import logging
 # -- 3rd party ---------------------------------------------------------------
 from flask import render_template
 from flask import jsonify
-from flask import g
 
 # -- Setup and configuration -------------------------------------------------
 from .app_objects import APP, CELERY_APP
@@ -33,10 +32,9 @@ from .utility_rest import set_html_as_default_response
 from .utility_rest import get_canarie_api_response
 from .utility_rest import validate_service_route
 from .utility_rest import make_error_response
-from .utility_rest import get_invocations_db
 from .utility_rest import request_wants_json
+from .utility_rest import mongo
 from .reverse_proxied import ReverseProxied
-from .utility_rest import get_requests_db
 from .utility_rest import AnyIntConverter
 from . import __meta__
 
@@ -45,12 +43,6 @@ APP.wsgi_app = ReverseProxied(APP.wsgi_app)
 
 START_UTC_TIME = datetime.datetime.utcnow()
 FL_API_URL = APP.config['FLOWER_API_URL']
-
-# Creates the database if it doesn't exist, connects to it and keeps it in
-# cache for hassle free runtime access
-with APP.app_context():
-    get_invocations_db()
-    get_requests_db()
 
 # REST requests required by CANARIE
 CANARIE_API_VALID_REQUESTS = ['doc',
@@ -78,10 +70,10 @@ HANDLED_HTML_ERRORS_STR = ", ".join(map(str, HANDLED_HTML_ERRORS))
 # http://stackoverflow.com/questions/938429/scope-of-python-lambda-functions-
 # and-their-parameters/938493#938493
 for status_code in HANDLED_HTML_ERRORS:
-    APP.error_handler_spec[None][status_code] = \
+    APP.register_error_handler(status_code,
         lambda more_info, status_code_copy = status_code: \
         make_error_response(html_status=status_code_copy,
-                            html_status_response=str(more_info))
+                            html_status_response=str(more_info)))
 
 
 @APP.errorhandler(Exception)
@@ -224,17 +216,8 @@ def stats(service_route='.'):
     service_name = validate_service_route(service_route)
 
     service_stats = {}
-    sql_query = 'select count(*) from invocations where ' \
-                'service = "{service_name}"'.format(service_name=service_name)
-
     service_stats['lastReset'] = START_UTC_TIME.strftime('%Y-%m-%dT%H:%M:%SZ')
-    sql_query += ' and datetime >= strftime("{utc_time}")'.\
-                 format(utc_time=START_UTC_TIME)
-
-    cur = get_invocations_db().execute(sql_query)
-    rows = cur.fetchall()
-    service_stats['invocations'] = rows[0][0]
-    cur.close()
+    service_stats['invocations'] = mongo.db.Invocations.count({"datetime": {"$gt": START_UTC_TIME}})
 
     if request_wants_json():
         return jsonify(service_stats)
@@ -287,21 +270,3 @@ def configure_home_route():
         APP.add_url_rule(rule, None, simple_requests_handler)
 
     logger.debug("Flask url map: {0}".format(APP.url_map))
-
-
-@APP.teardown_appcontext
-def close_connection(dummy_exception):
-    """
-    Disconnect database.
-
-    :param dummy_exception: Exception handled elsewhere, nothing to do with it
-    """
-    logger = logging.getLogger(__name__)
-    logger.info("Disconnecting from requests stats database")
-    requests_database = getattr(g, '_Requests_database', None)
-    if requests_database is not None:
-        requests_database.close()
-
-    invocations_database = getattr(g, '_Invocations_database', None)
-    if invocations_database is not None:
-        invocations_database.close()
