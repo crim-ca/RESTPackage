@@ -8,3 +8,4 @@ configparser
 future
 pymongo==3.7.2
 Flask-PyMongo==2.2.0
+sentry-sdk[flask]
