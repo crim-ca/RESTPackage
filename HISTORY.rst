@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.9.0
+-----
+
+* switched stats backend to MongoDB instead of sqlite3
+
 1.8.2
 -----
 
