@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.9.1
+-----
+
+* fixed packaging and upgraded flask to 0.12.4
+
 1.9.0
 -----
 

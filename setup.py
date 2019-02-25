@@ -21,13 +21,16 @@ else:
     HISTORY = ""
 
 REQUIREMENTS = [
-    "Flask==0.12.3",
+    "Flask==0.12.4",
     "pyrabbit==1.0.1",
     "PyJWT==0.4.3",
     "dicttoxml==1.6.6",
     "VestaService==0.4.1",
     "configparser",
-    "future"
+    "future",
+    "pymongo==3.7.2",
+    "Flask-PyMongo==2.2.0",
+    "sentry-sdk[flask]"
 ]
 
 TEST_REQUIREMENTS = [
