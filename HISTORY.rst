@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.9.2
+-----
+
+* fixed query for statistics
+
 1.9.1
 -----
 
