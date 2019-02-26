@@ -217,7 +217,7 @@ def stats(service_route='.'):
 
     service_stats = {}
     service_stats['lastReset'] = START_UTC_TIME.strftime('%Y-%m-%dT%H:%M:%SZ')
-    service_stats['invocations'] = mongo.db.Invocations.count({"datetime": {"$gt": START_UTC_TIME}})
+    service_stats['invocations'] = mongo.db.Invocations.count({"datetime": {"$gt": START_UTC_TIME}, "service": service_name})
 
     if request_wants_json():
         return jsonify(service_stats)
