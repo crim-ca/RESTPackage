@@ -1,6 +1,11 @@
 Release notes
 =============
 
+1.9.3
+-----
+
+* Added configurable timeout value for AMQP async calls
+
 1.9.2
 -----
 

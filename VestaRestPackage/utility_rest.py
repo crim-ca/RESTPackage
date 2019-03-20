@@ -270,7 +270,7 @@ def async_call(fct, *args, **kwargs):
                            args=args_augmented,
                            kwargs=kwargs)
     thr.start()
-    thr.join(timeout=5)
+    thr.join(timeout=APP.config['AMQP_TIMEOUT'])
     if thr.is_alive():
         raise AMQPError()
 

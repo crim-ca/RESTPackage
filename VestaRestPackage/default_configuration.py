@@ -39,6 +39,9 @@ CELERY = {
     'CELERY_ACCEPT_CONTENT': ["json"],
     'CELERY_TASK_RESULT_EXPIRES': 7200}
 
+# Timeout for AMQP async calls
+AMQP_TIMEOUT = 5
+
 REQUEST_REGISTER_FN = "static/requests.shelve"
 
 # security section. For tests without security, put
